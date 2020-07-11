@@ -16,6 +16,7 @@ try:
     from .commands.SampleCommand1 import SampleCommand1
     from .commands.SampleCommand2 import SampleCommand2
     from .commands.ModifyPart import ModifyPart
+    from .commands.BetterJoint import BetterJoint
     from .commands.SetAttributes import SetAttributes
     from .commands.ViewAttributes import ViewAttributes
 
@@ -69,9 +70,23 @@ try:
         {
             'cmd_description': 'Modify parametric parts from the VEX Fusion 360 Library.\n\nSelect part component and change parameters.',
             'cmd_id': 'modify_part',
-            'workspace': 'FusionSolidEnvironment',
-            'toolbar_panel_id': 'Modify',
+            'workspace': 'FusionSolidEnvironment', 
+            'toolbar_panel_id': 'Build',
             'cmd_resources': 'modify_part',
+            'command_visible': True,
+            'command_promoted': True,
+        }
+    )
+
+    addin.add_command(
+        'Better Joint',
+        BetterJoint,
+        {
+            'cmd_description': 'An easier to use joint tool for connecting VEX parts',
+            'cmd_id': 'better_joint',
+            'workspace': 'FusionSolidEnvironment',
+            'toolbar_panel_id': 'Build',
+            'cmd_resources': 'better_joint',
             'command_visible': True,
             'command_promoted': True,
         }
