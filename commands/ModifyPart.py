@@ -12,6 +12,9 @@ import json
 
 allInputObjects = []
 
+selectedComp = None
+selectedCompAttributes = None
+
 def defineInputs():
     ao = AppObjects()
     unitsMgr = ao.units_manager
@@ -54,11 +57,11 @@ def defineInputs():
             self.inputDistance.isVisible = False
             self.inputOffset.isVisible = False
         def onUpdate(self):
-            if self.inputDistance.value > self.parameter['maxValue']:
-                self.inputDistance.value = self.parameter['maxValue']
+            # if self.inputDistance.value > self.parameter['maxValue']:
+            #     self.inputDistance.value = self.parameter['maxValue']
 
-            if self.inputDistance.value + self.inputOffset.value > self.parameter['maxValue']:
-                self.inputOffset.value = self.parameter['maxValue'] - self.inputDistance.value
+            # if self.inputDistance.value + self.inputOffset.value > self.parameter['maxValue']:
+            #     self.inputOffset.value = self.parameter['maxValue'] - self.inputDistance.value
 
             # inputDistanceFloat = unitsMgr.evaluateExpression(self.inputDistance.expression, '')
             # if inputDistanceFloat > inToHoles.value(selectedComp.modelParameters.item(indexDistance).expression):
@@ -147,7 +150,7 @@ class ModifyPart(apper.Fusion360CommandBase):
     # Run whenever a user makes any change to a value or selection in the addin UI
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
     def on_preview(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
-        pass
+        updatePart(selectedComp, selectedCompAttributes)
 
     # Run after the command is finished.
     # Can be used to launch another command automatically or do other clean up.
@@ -164,12 +167,8 @@ class ModifyPart(apper.Fusion360CommandBase):
 
 
         selectionInput = inputs.itemById('selection_input_id')
-        # changeAttributes(selectionInput.selection(0).entity.component)
 
         if changed_input.id == 'selection_input_id':
-            # selectionInput.selection(0).entity.component.modelParameters.item(1).expression = '10'
-            # print('ModifyPartInputChangedHandler: ')
-            # print(selectionInput.selection(0).entity.component)
             if selectionInput.selectionCount == 1 and app.activeProduct.rootComponent != selectionInput.selection(0).entity:
                 selectedComp = selectionInput.selection(0).entity.component
                 if selectedComp and selectedComp.attributes.count > 0 and selectedComp.attributes.itemByName('VFL', 'partData'):
@@ -193,8 +192,6 @@ class ModifyPart(apper.Fusion360CommandBase):
 
     # Run when the user selects your command icon from the Fusion 360 UI
     # Typically used to create and display a command dialog box
-    # The following is a basic sample of a dialog UI
-
     def on_create(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs):
 
         ao = AppObjects()
@@ -214,21 +211,4 @@ class ModifyPart(apper.Fusion360CommandBase):
         for inputObject in allInputObjects:
             allInputObjects[inputObject].create(inputs)
         hideAllCommandInputs()
-            
-        # # Create a value input.  This will respect units and user defined equation input.
-        # inputs.addValueInput('value_input_id', '*Sample* Value Input', default_units, default_value)
-
-        # # Other Input types
-        # inputs.addBoolValueInput('bool_input_id', '*Sample* Check Box', True)
-        # inputs.addStringValueInput('string_input_id', '*Sample* String Value', 'Some Default Value')
-
-        # # Read Only Text Box
-        # inputs.addTextBoxCommandInput('text_box_input_id', 'Selection Type: ', 'Nothing Selected', 1, True)
-
-        # # Create a Drop Down
-        # drop_down_input = inputs.addDropDownCommandInput('drop_down_input_id', '*Sample* Drop Down',
-        #                                                  adsk.core.DropDownStyles.TextListDropDownStyle)
-        # drop_down_items = drop_down_input.listItems
-        # drop_down_items.add('List_Item_1', True, '')
-        # drop_down_items.add('List_Item_2', False, '')
 
