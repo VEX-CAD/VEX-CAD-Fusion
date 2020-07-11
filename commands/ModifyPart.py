@@ -57,21 +57,11 @@ def defineInputs():
             self.inputDistance.isVisible = False
             self.inputOffset.isVisible = False
         def onUpdate(self):
-            # if self.inputDistance.value > self.parameter['maxValue']:
-            #     self.inputDistance.value = self.parameter['maxValue']
+            if self.inputDistance.value > self.parameter['maxValue']:
+                self.inputDistance.value = self.parameter['maxValue']
 
-            # if self.inputDistance.value + self.inputOffset.value > self.parameter['maxValue']:
-            #     self.inputOffset.value = self.parameter['maxValue'] - self.inputDistance.value
-
-            # inputDistanceFloat = unitsMgr.evaluateExpression(self.inputDistance.expression, '')
-            # if inputDistanceFloat > inToHoles.value(selectedComp.modelParameters.item(indexDistance).expression):
-            # print(inputDistanceFloat)
-            # if inputDistanceFloat > self.parameter['maxValue']:
-            #     self.inputDistance.expression = str(self.parameter['maxValue'])
-            #     self.onUpdate()
-            # if inputDistanceFloat > self.parameter['maxValue']:
-            #     self.inputDistance.expression = str(self.parameter['maxValue'])
-            #     self.onUpdate()
+            if self.inputDistance.value + self.inputOffset.value > self.parameter['maxValue']:
+                self.inputOffset.value = self.parameter['maxValue'] - self.inputDistance.value
         def updatePart(self, comp):
             comp.modelParameters.item(self.parameter['indexDistance']).value = holesToIn.value(self.inputDistance.expression)
             comp.modelParameters.item(self.parameter['indexOffset']).value = holesToIn.value(self.inputOffset.expression)

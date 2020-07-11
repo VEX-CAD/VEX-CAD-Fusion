@@ -17,6 +17,7 @@ try:
     from .commands.SampleCommand2 import SampleCommand2
     from .commands.ModifyPart import ModifyPart
     from .commands.SetAttributes import SetAttributes
+    from .commands.ViewAttributes import ViewAttributes
 
     # Palette Command Base samples
     from .commands.SamplePaletteCommand import SamplePaletteSendCommand, SamplePaletteShowCommand
@@ -85,6 +86,20 @@ try:
             'workspace': 'FusionSolidEnvironment',
             'toolbar_panel_id': 'Advanced',
             'cmd_resources': 'set_attributes',
+            'command_visible': True,
+            'command_promoted': True,
+        }
+    )
+
+    addin.add_command(
+        'View Attributes',
+        ViewAttributes,
+        {
+            'cmd_description': 'View custom attributes for parts from the VEX Fusion 360 Library.',
+            'cmd_id': 'view_attributes',
+            'workspace': 'FusionSolidEnvironment',
+            'toolbar_panel_id': 'Advanced',
+            'cmd_resources': 'view_attributes',
             'command_visible': True,
             'command_promoted': True,
         }
