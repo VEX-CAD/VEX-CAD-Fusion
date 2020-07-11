@@ -1,4 +1,3 @@
-
 import os
 import sys
 import adsk.core
@@ -16,6 +15,7 @@ try:
     # Basic Fusion 360 Command Base samples
     from .commands.SampleCommand1 import SampleCommand1
     from .commands.SampleCommand2 import SampleCommand2
+    from .commands.SetAttributes import SetAttributes
 
     # Palette Command Base samples
     from .commands.SamplePaletteCommand import SamplePaletteSendCommand, SamplePaletteShowCommand
@@ -42,7 +42,7 @@ try:
             'toolbar_panel_id': 'Commands',
             'cmd_resources': 'command_icons',
             'command_visible': True,
-            'command_promoted': True,
+            'command_promoted': False,
         }
     )
 
@@ -58,6 +58,21 @@ try:
             'cmd_resources': 'command_icons',
             'command_visible': True,
             'command_promoted': False,
+        }
+    )
+
+    # General command showing inputs and user interaction
+    my_addin.add_command(
+        'Set Attributes',
+        SetAttributes,
+        {
+            'cmd_description': 'Set custom Attributes for parts from the VEX Fusion 360 Library.\n\nSelect part component and input valid JSON string.',
+            'cmd_id': 'set_attributes',
+            'workspace': 'FusionSolidEnvironment',
+            'toolbar_panel_id': 'Commands',
+            'cmd_resources': 'command_icons',
+            'command_visible': True,
+            'command_promoted': True,
         }
     )
 
