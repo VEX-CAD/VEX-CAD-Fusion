@@ -8,13 +8,15 @@ import apper
 # Alternatively you can import a specific function or class
 from apper import AppObjects
 
-import json
+import math
 
 allInputObjects = []
 
 selectedComp = None
 selectedCompAttributes = None
 
+globalFlip = True
+globalInside = False
 
 # Class for a Fusion 360 Command
 # Place your program logic here
@@ -24,6 +26,18 @@ class BetterJoint(apper.Fusion360CommandBase):
     # Run whenever a user makes any change to a value or selection in the addin UI
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
     def on_preview(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
+        print('on_preview')
+        if len(input_values['selection_input_id']) == 2:
+            self.on_execute(command, inputs, args, input_values)
+        # SelectionInput = input_values['selection_input_id']
+        #  point = SelectionInput[1]
+        # vector = adsk.core.Vector3D.create(0.0, 10.0, 0.0)
+        # transform = adsk.core.Matrix3D.create()
+        # transform.translation = vector
+        # # Create a move feature
+        # moveFeats = features.moveFeatures
+        # moveFeatureInput = moveFeats.createInput(bodies, transform)
+        # moveFeats.add(moveFeatureInput)
         pass
 
     # Run after the command is finished.
@@ -34,6 +48,30 @@ class BetterJoint(apper.Fusion360CommandBase):
     # Run when any input is changed.
     # Can be used to check a value and then update the add-in UI accordingly
     def on_input_changed(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, changed_input, input_values):
+        print('on_input_changed')
+        SelectionInput = input_values['selection_input_id']
+        angle = inputs.itemById('angle_id')
+        if len(SelectionInput) == 2:
+            point = SelectionInput[1]
+            xDirection = point.parentSketch.xDirection
+            yDirection = point.parentSketch.yDirection
+            angle.setManipulator(point.worldGeometry, xDirection, yDirection)
+            angle.isVisible = True
+            if changed_input == angle:
+                # print((int(angle.value / math.tau * 4 + 0.5) % 4) * math.tau)
+                # angle.value = (int(angle.value / math.tau * 4 + 0.5) % 4) * math.tau
+                if angle.value > math.pi * 2 - math.pi * 0.25:
+                    angle.value = math.pi * 2
+                elif angle.value > math.pi * 1.5 - math.pi * 0.25:
+                    angle.value = math.pi  * 1.5
+                elif angle.value > math.pi * 1 - math.pi * 0.25:
+                    angle.value = math.pi * 1
+                elif angle.value > math.pi * 0.5 - math.pi * 0.25:
+                    angle.value = math.pi * 0.5
+                else:
+                    angle.value = 0
+        else:
+            angle.isVisible = False
         pass
         # app = adsk.core.Application.get()
         # global selectedComp
@@ -56,11 +94,13 @@ class BetterJoint(apper.Fusion360CommandBase):
  
         product = app.activeProduct
         design = adsk.fusion.Design.cast(product)
+        vi = adsk.core.ValueInput
 
         # Get the root component of the active design
         rootComp = design.rootComponent
         
         SelectionInput = input_values['selection_input_id']
+        Rotate = inputs.itemById('rotate_id')
         
         # Create the first joint geometry with the end face
         geo0 = adsk.fusion.JointGeometry.createByPoint(SelectionInput[0])
@@ -71,11 +111,28 @@ class BetterJoint(apper.Fusion360CommandBase):
         jointInput = joints.createInput(geo0, geo1)
         
         # Set the joint input
-        # angle = adsk.core.ValueInput.createByString('90 deg')
+        # if Rotate.listItems.item(0).isSelected:
+        #     angle = vi.createByString('90 deg')
+        # elif Rotate.listItems.item(1).isSelected:
+        #     angle = vi.createByString('0 deg')
+        # elif Rotate.listItems.item(2).isSelected:
+        #     angle = vi.createByString('180 deg')
+        # elif Rotate.listItems.item(3).isSelected:
+        #     angle = vi.createByString('270 deg')
         # jointInput.angle = angle
-        # offset = adsk.core.ValueInput.createByString('1 cm')
-        # jointInput.offset = offset
-        jointInput.isFlipped = True
+        jointInput.angle = vi.createByReal(inputs.itemById('angle_id').value)
+        # jointInput.angle = vi.createByReal(input_values['angle_id'])
+
+        global globalInside
+        globalInside = input_values['inside_id']
+        if input_values['inside_id']:
+            offset = '-0.063 in'
+        else:
+            offset = '0'
+        jointInput.offset = vi.createByString(offset)
+        global globalFlip
+        globalFlip = input_values['flip_id']
+        jointInput.isFlipped = input_values['flip_id']
         jointInput.setAsRigidJointMotion()
         
         # Create the joint
@@ -101,4 +158,16 @@ class BetterJoint(apper.Fusion360CommandBase):
         SelectionInput = inputs.addSelectionInput('selection_input_id', 'Select points on part to move', 'Points to select')
         SelectionInput.setSelectionLimits(2, 2)
         SelectionInput.addSelectionFilter('SketchPoints')
+        angle = inputs.addAngleValueCommandInput('angle_id', 'Angle', adsk.core.ValueInput.createByString('0 deg'))
+        angle.isVisible = False
+        # angle.setManipulator(adsk.core.Point3D.create(0, 0, 0), adsk.core.Vector3D.create(1, 0, 0), adsk.core.Vector3D.create(0, 0, 1))
+        # angle.minimumValue = adsk.core.ValueInput.createByString('-360 deg')
+        # angle.maximumValue = adsk.core.ValueInput.createByString('360 deg')
+        # Rotate = inputs.addButtonRowCommandInput('rotate_id', 'Rotate', False)
+        # Rotate.listItems.add('Left', False, 'commands/resources/rotate')
+        # Rotate.listItems.add('Up', True, 'commands/resources/rotate')
+        # Rotate.listItems.add('Down', False, 'commands/resources/rotate')
+        # Rotate.listItems.add('Right', False, 'commands/resources/rotate')
+        inputs.addBoolValueInput('flip_id', 'Flip', True, 'commands/resources/flip_allignment', globalFlip)
+        inputs.addBoolValueInput('inside_id', 'Inside', True, 'commands/resources/plane_offset', globalInside)
 

@@ -70,7 +70,7 @@ try:
         {
             'cmd_description': 'Modify parametric parts from the VEX Fusion 360 Library.\n\nSelect part component and change parameters.',
             'cmd_id': 'modify_part',
-            'workspace': 'FusionSolidEnvironment', 
+            'workspace': 'FusionSolidEnvironment',
             'toolbar_panel_id': 'Build',
             'cmd_resources': 'modify_part',
             'command_visible': True,
