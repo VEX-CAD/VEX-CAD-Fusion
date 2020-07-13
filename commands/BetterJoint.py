@@ -22,13 +22,24 @@ globalInside = False
 # Place your program logic here
 # Delete the line that says 'pass' for any method you want to use
 class BetterJoint(apper.Fusion360CommandBase):
+    # self.lastAngleValue = 0
 
     # Run whenever a user makes any change to a value or selection in the addin UI
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
     def on_preview(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
-        print('on_preview')
         if len(input_values['selection_input_id']) == 2:
+            # angle = inputs.itemById('angle_id')
+            # if changed_input == angle:
+            #     if angle.value != self.lastAngleValue
+            #         self.lastAngleValue = angle.value
+            #         self.on_execute(command, inputs, args, input_values)
+            # else:
+            #     self.on_execute(command, inputs, args, input_values)
             self.on_execute(command, inputs, args, input_values)
+
+            # point = SelectionInput[1]
+            # point.assemblyContext.transform.setWithCoordinateSystem()
+            
         # SelectionInput = input_values['selection_input_id']
         #  point = SelectionInput[1]
         # vector = adsk.core.Vector3D.create(0.0, 10.0, 0.0)
@@ -48,11 +59,14 @@ class BetterJoint(apper.Fusion360CommandBase):
     # Run when any input is changed.
     # Can be used to check a value and then update the add-in UI accordingly
     def on_input_changed(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, changed_input, input_values):
-        print('on_input_changed')
+        ao = AppObjects()
         SelectionInput = input_values['selection_input_id']
         angle = inputs.itemById('angle_id')
         if len(SelectionInput) == 2:
             point = SelectionInput[1]
+            # ao.ui.messageBox(str(point))
+            # ao.ui.messageBox(str(point.assemblyContext.name))
+
             xDirection = point.parentSketch.xDirection
             yDirection = point.parentSketch.yDirection
             angle.setManipulator(point.worldGeometry, xDirection, yDirection)
@@ -60,16 +74,21 @@ class BetterJoint(apper.Fusion360CommandBase):
             if changed_input == angle:
                 # print((int(angle.value / math.tau * 4 + 0.5) % 4) * math.tau)
                 # angle.value = (int(angle.value / math.tau * 4 + 0.5) % 4) * math.tau
-                if angle.value > math.pi * 2 - math.pi * 0.25:
-                    angle.value = math.pi * 2
-                elif angle.value > math.pi * 1.5 - math.pi * 0.25:
-                    angle.value = math.pi  * 1.5
-                elif angle.value > math.pi * 1 - math.pi * 0.25:
-                    angle.value = math.pi * 1
-                elif angle.value > math.pi * 0.5 - math.pi * 0.25:
-                    angle.value = math.pi * 0.5
-                else:
-                    angle.value = 0
+                # if angle.value > math.pi * 2 - math.pi * 0.25:
+                #     angle.value = math.pi * 2
+                # elif angle.value > math.pi * 1.5 - math.pi * 0.25:
+                #     angle.value = math.pi  * 1.5
+                # elif angle.value > math.pi * 1 - math.pi * 0.25:
+                #     angle.value = math.pi * 1
+                # elif angle.value > math.pi * 0.5 - math.pi * 0.25:
+                #     angle.value = math.pi * 0.5
+                # else:
+                    # angle.value = 0
+                
+                for multiplier in range(8, -1, -1):
+                    if angle.value > math.pi * multiplier / 4 - math.pi / 8:
+                        angle.value = math.pi * multiplier / 4
+                        break
         else:
             angle.isVisible = False
         pass
