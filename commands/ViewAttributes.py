@@ -29,18 +29,20 @@ class ViewAttributes(apper.Fusion360CommandBase):
     # Run when any input is changed.
     # Can be used to check a value and then update the add-in UI accordingly
     def on_input_changed(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, changed_input, input_values):
-        pass
-        # Selections are returned as a list so lets get the first one
-        all_selections = input_values.get('selection_input_id', None)
-
-        if all_selections is not None:
-            the_first_selection = all_selections[0]
-
-            # Update the text of the string value input to show the type of object selected
-            # text_box_input = inputs.itemById('text_box_input_id')
-            input_values['textBox'] = str(the_first_selection.attributes)
-            input_values['textBox'] = the_first_selection.attributes.itemByName("VFL", "partData").value
-            # text_box_input.text = str(the_first_selection.attributes.itemByName("VFL", "partData").value)
+        textBox = inputs.itemById('textBox')
+        selectionInput = inputs.itemById('selection_input_id')
+        if selectionInput.selectionCount > 0:
+            textBox.isVisible = True
+            if selectionInput.selection(0).entity.objectType == 'adsk::fusion::Occurrence':
+                entity = selectionInput.selection(0).entity.component
+            else: 
+                entity = selectionInput.selection(0).entity
+            if entity.attributes.count > 0:
+                textBox.text = entity.attributes.itemByName("VFL", "partData").value
+            else:
+                textBox.text = "The selection does not have any attributes"
+        else:
+            textBox.isVisible = False
 
     # Run when the user presses OK
     # This is typically where your main program logic would go
@@ -62,5 +64,5 @@ class ViewAttributes(apper.Fusion360CommandBase):
         default_units = ao.units_manager.defaultLengthUnits
 
         selectionInput = inputs.addSelectionInput('selection_input_id', 'Select Parametric Part', 'Component to select')
-        selectionInput.setSelectionLimits(1, 0)
+        selectionInput.setSelectionLimits(1, 1)
         textBox = inputs.addTextBoxCommandInput('textBox', 'JSON String', '', 20, True)

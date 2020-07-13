@@ -63,15 +63,27 @@ class SetAttributes(apper.Fusion360CommandBase):
         # Get a reference to all relevant application objects in a dictionary
         ao = AppObjects()
 
-        try:
-            json.loads(jsonString)
-            selectedComp.attributes.add("VFL", "partData", jsonString)
-            appliedAttributes = selectedComp.attributes.itemByName("VFL", "partData").value
-            ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
-        except:
-            ao.ui.messageBox(jsonString + '\n\nis not a valid JSON string.', 'Invalid entry', 
-                            adsk.core.MessageBoxButtonTypes.OKButtonType, 
-                            adsk.core.MessageBoxIconTypes.CriticalIconType)
+        # textBox = inputs.itemById('textBox')
+        selectionInput = inputs.itemById('selection_input_id')
+        if selectionInput.selectionCount > 0:
+            # textBox.isVisible = True
+            if selectionInput.selection(0).entity.objectType == 'adsk::fusion::Occurrence':
+                entity = selectionInput.selection(0).entity.component
+            else: 
+                entity = selectionInput.selection(0).entity
+            if entity.attributes.count > 0:
+                try:
+                    json.loads(jsonString)
+                    entity.attributes.add("VFL", "partData", jsonString)
+                    appliedAttributes = entity.attributes.itemByName("VFL", "partData").value
+                    ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
+                except:
+                    ao.ui.messageBox(jsonString + '\n\nis not a valid JSON string.', 'Invalid entry', 
+                                    adsk.core.MessageBoxButtonTypes.OKButtonType, 
+                                    adsk.core.MessageBoxIconTypes.CriticalIconType)
+            else:
+                ao.ui.messageBox('The selection does not have any attributes')
+
 
     # Run when the user selects your command icon from the Fusion 360 UI
     # Typically used to create and display a command dialog box
