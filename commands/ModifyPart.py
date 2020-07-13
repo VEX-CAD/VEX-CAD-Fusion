@@ -83,8 +83,8 @@ def showSomeCommandInputs(parameters):
         allInputObjects[parameter].show(parameters[parameter])
 
 def updateInputs(parameters):
-        for parameter in parameters:
-            allInputObjects[parameter].onUpdate()
+    for parameter in parameters:
+        allInputObjects[parameter].onUpdate()
 
 def updateModelParameter(comp, parameters):
     comp.modelParameters.item(parameters['indexMP']).expression = parameters['value']
@@ -104,23 +104,9 @@ def updateInserts(comp, parameters):
 
 
 def updatePart(comp, parameters):
-    # print('updatePart: ')
-    # print(comp)
-    for parameter in parameters['parameters']:
-        allInputObjects[parameter].updatePart(comp)
-
-    # for key, value in parameters.items():
-    #     if key == 'lengthHoles':
-    #         updateModelParameter(comp, value)
-    #     elif key == 'widthHoles':
-    #         updateModelParameter(comp, value)
-    #     elif key == 'inserts':
-    #         updateInserts(comp, value)
-
-
-
-
-
+    if 'parameters' in parameters:
+        for parameter in parameters['parameters']:
+            allInputObjects[parameter].updatePart(comp)
 
 
 
@@ -158,13 +144,17 @@ class ModifyPart(apper.Fusion360CommandBase):
 
         selectionInput = inputs.itemById('selection_input_id')
 
+        selectionInput = inputs.itemById('selection_input_id')
         if changed_input.id == 'selection_input_id':
-            if selectionInput.selectionCount == 1 and app.activeProduct.rootComponent != selectionInput.selection(0).entity:
-                selectedComp = selectionInput.selection(0).entity.component
-                if selectedComp and selectedComp.attributes.count > 0 and selectedComp.attributes.itemByName('VFL', 'partData'):
+            if selectionInput.selectionCount > 0:
+                if selectionInput.selection(0).entity.objectType == 'adsk::fusion::Occurrence':
+                    selectedComp = selectionInput.selection(0).entity.component
+                else: 
+                    selectedComp = selectionInput.selection(0).entity
+                if selectedComp.attributes.count > 0 and selectedComp.attributes.itemByName('VFL', 'partData'):
                     selectedCompAttributes = json.loads(selectedComp.attributes.itemByName('VFL', 'partData').value)
-                    showSomeCommandInputs(selectedCompAttributes['parameters'])
-
+                    if 'parameters' in selectedCompAttributes:
+                        showSomeCommandInputs(selectedCompAttributes['parameters'])
                 else:
                     selectionInput.clearSelection()
             else:
@@ -172,7 +162,8 @@ class ModifyPart(apper.Fusion360CommandBase):
                 selectedCompAttributes.clear()
                 hideAllCommandInputs()
         else:
-            updateInputs(selectedCompAttributes['parameters'])
+            if 'parameters' in selectedCompAttributes:
+                updateInputs(selectedCompAttributes['parameters'])
 
     # Run when the user presses OK
     # This is typically where your main program logic would go

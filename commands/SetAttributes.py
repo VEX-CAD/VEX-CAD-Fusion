@@ -43,46 +43,27 @@ class SetAttributes(apper.Fusion360CommandBase):
     # Run when the user presses OK
     # This is typically where your main program logic would go
     def on_execute(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
-
-        # Get the values from the user input
-        # the_value = input_values['value_input_id']
-        # the_boolean = input_values['bool_input_id']
-        # the_string = input_values['string_input_id']
-        # all_selections = input_values['selection_input_id']
-        # the_drop_down = input_values['drop_down_input_id']
-
-        # Selections are returned as a list so lets get the first one and its name
-        # the_first_selection = all_selections[0]
-        # the_selection_type = the_first_selection.objectType
-
-        selectionInput = input_values['selection_input_id']
-        # if selectionInput.selection(0).entity == app.activeProduct.rootComponent:
-        selectedComp = selectionInput[0]
-        jsonString = input_values['textBox']
-
         # Get a reference to all relevant application objects in a dictionary
         ao = AppObjects()
 
-        # textBox = inputs.itemById('textBox')
+        selectionInput = input_values['selection_input_id']
+        jsonString = input_values['textBox']
+
         selectionInput = inputs.itemById('selection_input_id')
         if selectionInput.selectionCount > 0:
-            # textBox.isVisible = True
             if selectionInput.selection(0).entity.objectType == 'adsk::fusion::Occurrence':
                 entity = selectionInput.selection(0).entity.component
             else: 
                 entity = selectionInput.selection(0).entity
-            if entity.attributes.count > 0:
-                try:
-                    json.loads(jsonString)
-                    entity.attributes.add("VFL", "partData", jsonString)
-                    appliedAttributes = entity.attributes.itemByName("VFL", "partData").value
-                    ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
-                except:
-                    ao.ui.messageBox(jsonString + '\n\nis not a valid JSON string.', 'Invalid entry', 
-                                    adsk.core.MessageBoxButtonTypes.OKButtonType, 
-                                    adsk.core.MessageBoxIconTypes.CriticalIconType)
-            else:
-                ao.ui.messageBox('The selection does not have any attributes')
+            try:
+                json.loads(jsonString)
+                entity.attributes.add("VFL", "partData", jsonString)
+                appliedAttributes = entity.attributes.itemByName("VFL", "partData").value
+                ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
+            except:
+                ao.ui.messageBox(jsonString + '\n\nis not a valid JSON string.', 'Invalid entry', 
+                                adsk.core.MessageBoxButtonTypes.OKButtonType, 
+                                adsk.core.MessageBoxIconTypes.CriticalIconType)
 
 
     # Run when the user selects your command icon from the Fusion 360 UI
