@@ -20,7 +20,7 @@ globalFlip = True
 # Class for a Fusion 360 Command
 # Place your program logic here
 # Delete the line that says 'pass' for any method you want to use
-class SimpleJoint(apper.Fusion360CommandBase):
+class PointsToJointOrigins(apper.Fusion360CommandBase):
     lastAngleValue = 0
 
     # Run whenever a user makes any change to a value or selection in the addin UI
@@ -58,27 +58,7 @@ class SimpleJoint(apper.Fusion360CommandBase):
     # Run when any input is changed.
     # Can be used to check a value and then update the add-in UI accordingly
     def on_input_changed(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, changed_input, input_values):
-        ao = AppObjects()
-        SelectionInput = input_values['selection_input_id']
-        angle = inputs.itemById('angle_id')
-        if len(SelectionInput) == 2:
-            point = SelectionInput[1]
-            # ao.ui.messageBox(str(point))
-            # ao.ui.messageBox(str(point.assemblyContext.name))
-
-            xDirection = point.parentSketch.xDirection
-            yDirection = point.parentSketch.yDirection
-            angle.setManipulator(point.worldGeometry, xDirection, yDirection)
-            angle.isVisible = True
-            if changed_input == angle:                
-                for multiplier in range(8, -1, -1):
-                    if angle.value > math.pi * multiplier / 4 - math.pi / 8:
-                        angle.value = math.pi * multiplier / 4
-                        break
-        else:
-            angle.isVisible = False
         pass
-
 
     # Run when the user presses OK
     # This is typically where your main program logic would go
@@ -92,43 +72,20 @@ class SimpleJoint(apper.Fusion360CommandBase):
         product = app.activeProduct
         design = adsk.fusion.Design.cast(product)
         vi = adsk.core.ValueInput
-
-        # Get the root component of the active design
-        rootComp = design.rootComponent
         
         SelectionInput = input_values['selection_input_id']
-        Rotate = inputs.itemById('rotate_id')
+        for point in SelectionInput:
+            comp = point.parentSketch.parentComponent
+            geo = adsk.fusion.JointGeometry.createByPoint(point)
+            jointOrigin = comp.jointOrigins.createInput(geo)
+            comp.jointOrigins.add(jointOrigin)
         
-        # Create the first joint geometry with the end face
-        geo0 = adsk.fusion.JointGeometry.createByPoint(SelectionInput[0])
-        geo1 = adsk.fusion.JointGeometry.createByPoint(SelectionInput[1])
-        
-        # Create joint input
-        joints = rootComp.joints
-        jointInput = joints.createInput(geo0, geo1)
-        
-        jointInput.angle = vi.createByReal(inputs.itemById('angle_id').value)
-        global globalFlip
-        globalFlip = input_values['flip_id']
-        jointInput.isFlipped = input_values['flip_id']
-        jointInput.setAsRigidJointMotion()
-        
-        # Create the joint
-        joint = joints.add(jointInput)
-        
-        # Get health state of a joint
-        health = joint.healthState
-        if health == adsk.fusion.FeatureHealthStates.ErrorFeatureHealthState or health == adsk.fusion.FeatureHealthStates.WarningFeatureHealthState:
-            message = joint.errorOrWarningMessage
 
     # Run when the user selects your command icon from the Fusion 360 UI
     # Typically used to create and display a command dialog box
     def on_create(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs):
 
-        SelectionInput = inputs.addSelectionInput('selection_input_id', 'Points', 'Select a sketch point to place the Joint Origin')
-        SelectionInput.setSelectionLimits(2, 2)
+        SelectionInput = inputs.addSelectionInput('selection_input_id', 'Points', 'Select sketch points to place the Joint Origins')
+        SelectionInput.setSelectionLimits(1, 0)
         SelectionInput.addSelectionFilter('SketchPoints')
-        angle = inputs.addAngleValueCommandInput('angle_id', 'Angle', adsk.core.ValueInput.createByString('0 deg'))
-        angle.isVisible = False
-        inputs.addBoolValueInput('flip_id', 'Flip', True, 'commands/resources/command_icons/flip_allignment', globalFlip)
 

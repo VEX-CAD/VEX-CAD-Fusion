@@ -8,6 +8,11 @@ app_path = os.path.dirname(__file__)
 sys.path.insert(0, app_path)
 sys.path.insert(0, os.path.join(app_path, 'apper'))
 
+# Set to True to use beta and development features
+unreleasedFeatures = True
+# Set to True to display various useful messages when debugging
+debug = False
+
 try:
     import config
     import apper
@@ -16,8 +21,10 @@ try:
     from .commands.SimpleJoint import SimpleJoint
     from .commands.SetAttributes import SetAttributes
     from .commands.ViewAttributes import ViewAttributes
+    from .commands.PointsToJointOrigins import PointsToJointOrigins
 
-# Create addin definition object
+
+    # Create addin definition object
     addin = apper.FusionApp(config.app_name, config.company_name, False)
 
     addin.add_command(
@@ -34,49 +41,62 @@ try:
         }
     )
 
-    # uncomment to try out the beta Simple Joint tool.
+    if unreleasedFeatures:
+        addin.add_command(
+            'Simple Joint (beta)',
+            SimpleJoint,
+            {
+                'cmd_description': 'An easier to use joint tool for connecting VEX parts',
+                'cmd_id': 'simple_joint',
+                'workspace': 'FusionSolidEnvironment',
+                'toolbar_panel_id': 'Assemble',
+                'cmd_resources': 'command_icons/joint',
+                'command_visible': True,
+                'command_promoted': True,
+            }
+        )
 
-    addin.add_command(
-        'Simple Joint (beta)',
-        SimpleJoint,
-        {
-            'cmd_description': 'An easier to use joint tool for connecting VEX parts',
-            'cmd_id': 'simple_joint',
-            'workspace': 'FusionSolidEnvironment',
-            'toolbar_panel_id': 'Assemble',
-            'cmd_resources': 'command_icons/joint',
-            'command_visible': True,
-            'command_promoted': True,
-        }
-    )
+        addin.add_command(
+            'Set Attributes',
+            SetAttributes,
+            {
+                'cmd_description': 'Set custom attributes for parts from the VEX CAD Library.\n\nSelect part component and input valid JSON string.',
+                'cmd_id': 'set_attributes',
+                'workspace': 'FusionSolidEnvironment',
+                'toolbar_panel_id': 'Advanced',
+                'cmd_resources': 'command_icons/edit',
+                'command_visible': True,
+                'command_promoted': True,
+            }
+        )
 
-    addin.add_command(
-        'Set Attributes',
-        SetAttributes,
-        {
-            'cmd_description': 'Set custom attributes for parts from the VEX CAD Library.\n\nSelect part component and input valid JSON string.',
-            'cmd_id': 'set_attributes',
-            'workspace': 'FusionSolidEnvironment',
-            'toolbar_panel_id': 'Advanced',
-            'cmd_resources': 'command_icons/edit',
-            'command_visible': True,
-            'command_promoted': True,
-        }
-    )
+        addin.add_command(
+            'View Attributes',
+            ViewAttributes,
+            {
+                'cmd_description': 'View custom attributes for parts from the VEX CAD Library.',
+                'cmd_id': 'view_attributes',
+                'workspace': 'FusionSolidEnvironment',
+                'toolbar_panel_id': 'Advanced',
+                'cmd_resources': 'command_icons/attributes',
+                'command_visible': True,
+                'command_promoted': True,
+            }
+        )
 
-    addin.add_command(
-        'View Attributes',
-        ViewAttributes,
-        {
-            'cmd_description': 'View custom attributes for parts from the VEX CAD Library.',
-            'cmd_id': 'view_attributes',
-            'workspace': 'FusionSolidEnvironment',
-            'toolbar_panel_id': 'Advanced',
-            'cmd_resources': 'command_icons/attributes',
-            'command_visible': True,
-            'command_promoted': True,
-        }
-    )
+        addin.add_command(
+            'Points to Joint Origins',
+            PointsToJointOrigins,
+            {
+                'cmd_description': 'Set custom attributes for parts from the VEX CAD Library.\n\nSelect part component and input valid JSON string.',
+                'cmd_id': 'points_to_joint_origins',
+                'workspace': 'FusionSolidEnvironment',
+                'toolbar_panel_id': 'Advanced',
+                'cmd_resources': 'command_icons/joint_origin',
+                'command_visible': True,
+                'command_promoted': True,
+            }
+        )
 
     app = adsk.core.Application.cast(adsk.core.Application.get())
     ui = app.userInterface
@@ -87,8 +107,6 @@ except:
     if ui:
         ui.messageBox('Initialization: {}'.format(traceback.format_exc()))
 
-# Set to True to display various useful messages when debugging your app
-debug = False
 
 
 def run(context):
