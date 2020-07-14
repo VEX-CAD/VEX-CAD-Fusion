@@ -1,4 +1,4 @@
-VEX Fusion Library
+VEX CAD Fusion Library
 ==================
 
 
@@ -22,4 +22,3 @@ Licence
 Authors
 -------
 
-`VEX Fusion Library` was written by `Justin K <my@email.com>`_.

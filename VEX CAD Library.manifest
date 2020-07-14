@@ -2,10 +2,10 @@
     "autodeskProduct": "Fusion360",
     "type": "addin",
     "id": "db73d70e-8583-4435-b1c6-b8c198b686f1",
-    "author": "Justin K",
+    "author": "VEX CAD",
     "description": "VEX parts library for Fusion 360",
-    "version": "0.1.0",
-    "runOnStartup": false,
+    "version": "1.0.0",
+    "runOnStartup": true,
     "supportedOS": "windows|mac",
     "editEnabled": true
 }
