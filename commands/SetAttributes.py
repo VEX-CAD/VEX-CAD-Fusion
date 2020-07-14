@@ -8,7 +8,7 @@ import apper
 # Alternatively you can import a specific function or class
 from apper import AppObjects
 
-import json
+import json, uuid
 
 
 # Class for a Fusion 360 Command
@@ -30,15 +30,6 @@ class SetAttributes(apper.Fusion360CommandBase):
     # Can be used to check a value and then update the add-in UI accordingly
     def on_input_changed(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, changed_input, input_values):
         pass
-        # # Selections are returned as a list so lets get the first one
-        # all_selections = input_values.get('selection_input_id', None)
-
-        # if all_selections is not None:
-        #     the_first_selection = all_selections[0]
-
-        #     # Update the text of the string value input to show the type of object selected
-        #     text_box_input = inputs.itemById('text_box_input_id')
-        #     text_box_input.text = the_first_selection.objectType
 
     # Run when the user presses OK
     # This is typically where your main program logic would go
@@ -47,23 +38,27 @@ class SetAttributes(apper.Fusion360CommandBase):
         ao = AppObjects()
 
         selectionInput = input_values['selection_input_id']
-        jsonString = input_values['textBox']
+        inputString = input_values['textBox']
 
+        attributesDict = {"uuid": str(uuid.uuid4())}
+        try:
+            attributesDict.update(json.loads(inputString))
+        except:
+            ao.ui.messageBox(inputString + '\n\nis not a valid JSON string.', 'Invalid entry', 
+                            adsk.core.MessageBoxButtonTypes.OKButtonType, 
+                            adsk.core.MessageBoxIconTypes.CriticalIconType)
+            return
+        
+        attributesJson = json.dumps(attributesDict)
         selectionInput = inputs.itemById('selection_input_id')
         if selectionInput.selectionCount > 0:
             if selectionInput.selection(0).entity.objectType == 'adsk::fusion::Occurrence':
                 entity = selectionInput.selection(0).entity.component
             else: 
                 entity = selectionInput.selection(0).entity
-            try:
-                json.loads(jsonString)
-                entity.attributes.add("VFL", "part_data", jsonString)
+                entity.attributes.add("VFL", "part_data", attributesJson)
                 appliedAttributes = entity.attributes.itemByName("VFL", "part_data").value
                 ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
-            except:
-                ao.ui.messageBox(jsonString + '\n\nis not a valid JSON string.', 'Invalid entry', 
-                                adsk.core.MessageBoxButtonTypes.OKButtonType, 
-                                adsk.core.MessageBoxIconTypes.CriticalIconType)
 
 
     # Run when the user selects your command icon from the Fusion 360 UI
@@ -81,5 +76,5 @@ class SetAttributes(apper.Fusion360CommandBase):
         default_units = ao.units_manager.defaultLengthUnits
 
         selectionInput = inputs.addSelectionInput('selection_input_id', 'Select Parametric Part', 'Component to select')
-        selectionInput.setSelectionLimits(1, 0)
+        selectionInput.setSelectionLimits(1, 1)
         textBox = inputs.addStringValueInput('textBox', 'JSON String')

@@ -37,10 +37,10 @@ def defineInputs():
         def onUpdate(self):
             pass
 
-    class FloatSpinnerDistanceOffsetHoles(Input):
+    class FloatSpinnerDistanceOffsetHoles_1_0_0(Input):
         def create(self, commandInputs):
-            self.inputDistance = commandInputs.addFloatSpinnerCommandInput(self.id + 'Distance', self.name, '', 0, 40, 1, 0)
-            self.inputOffset = commandInputs.addFloatSpinnerCommandInput(self.id + 'Offset', 'Offset Holes', '', 0, 40, 1, 0)
+            self.inputDistance = commandInputs.addFloatSpinnerCommandInput(self.id + 'Distance', self.name, '', 0, 35, 1, 0)
+            self.inputOffset = commandInputs.addFloatSpinnerCommandInput(self.id + 'Offset', 'Offset Holes', '', 0, 35, 1, 0)
         def show(self, parameter):
             self.parameter = parameter
             index_distance = self.parameter['index_distance']
@@ -66,11 +66,11 @@ def defineInputs():
     
     class FloatSpinnerDistanceHoles_1_0_0(Input):
         def create(self, commandInputs):
-            self.input = commandInputs.FloatSliderCommandInput (self.id + 'Distance', self.name, '', 0, 40, 1, 0)
+            self.input = commandInputs.addFloatSpinnerCommandInput(self.id + 'Distance', self.name, '', 0, 35, 1, 0)
         def show(self, parameter):
             self.parameter = parameter
-            index_distance = self.parameter['index_distance']
-            self.input.expression = str(inToHoles.value(selectedComp.modelParameters.item(index_distance).expression))
+            index = self.parameter['index']
+            self.input.expression = str(inToHoles.value(selectedComp.modelParameters.item(index).expression))
             
             self.input.isVisible = True
             self.onUpdate()
@@ -79,13 +79,13 @@ def defineInputs():
                 self.input.value = self.parameter['max_value']
 
         def updatePart(self, comp):
-            comp.modelParameters.item(self.parameter['index_distance']).value = holesToIn.value(self.input.expression)
+            comp.modelParameters.item(self.parameter['index']).value = holesToIn.value(self.input.expression)
     
     return [
-        FloatSpinnerDistanceHoles('length_holes_1_0_0', 'Length Holes'),
-        FloatSpinnerDistanceHoles('width_holes_1_0_0', 'Width Holes'),
-        FloatSpinnerDistanceOffsetHoles('FloatSpinnerDistanceOffsetHolesLength', 'Length Holes'),
-        FloatSpinnerDistanceOffsetHoles('FloatSpinnerDistanceOffsetHolesWidth', 'Width Holes')]
+        FloatSpinnerDistanceHoles_1_0_0('length_holes_1_0_0', 'Length Holes'),
+        FloatSpinnerDistanceHoles_1_0_0('width_holes_1_0_0', 'Width Holes'),
+        FloatSpinnerDistanceOffsetHoles_1_0_0('length_holes_offset_1_0_0', 'Length Holes'),
+        FloatSpinnerDistanceOffsetHoles_1_0_0('width_holes_offset_1_0_0', 'Width Holes')]
 
 
 def createAllCommandInputs(commandInputs):

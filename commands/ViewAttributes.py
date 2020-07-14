@@ -65,4 +65,4 @@ class ViewAttributes(apper.Fusion360CommandBase):
 
         selectionInput = inputs.addSelectionInput('selection_input_id', 'Select Parametric Part', 'Component to select')
         selectionInput.setSelectionLimits(1, 1)
-        textBox = inputs.addTextBoxCommandInput('textBox', 'JSON String', '', 20, True)
+        textBox = inputs.addTextBoxCommandInput('textBox', 'JSON String', '', 5, True)
