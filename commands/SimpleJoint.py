@@ -179,14 +179,6 @@ class SimpleJoint(apper.Fusion360CommandBase):
         SelectionInput.addSelectionFilter('SketchPoints')
         angle = inputs.addAngleValueCommandInput('angle_id', 'Angle', adsk.core.ValueInput.createByString('0 deg'))
         angle.isVisible = False
-        # angle.setManipulator(adsk.core.Point3D.create(0, 0, 0), adsk.core.Vector3D.create(1, 0, 0), adsk.core.Vector3D.create(0, 0, 1))
-        # angle.minimumValue = adsk.core.ValueInput.createByString('-360 deg')
-        # angle.maximumValue = adsk.core.ValueInput.createByString('360 deg')
-        # Rotate = inputs.addButtonRowCommandInput('rotate_id', 'Rotate', False)
-        # Rotate.listItems.add('Left', False, 'commands/resources/rotate')
-        # Rotate.listItems.add('Up', True, 'commands/resources/rotate')
-        # Rotate.listItems.add('Down', False, 'commands/resources/rotate')
-        # Rotate.listItems.add('Right', False, 'commands/resources/rotate')
-        inputs.addBoolValueInput('flip_id', 'Flip', True, 'commands/resources/flip_allignment', globalFlip)
-        inputs.addBoolValueInput('inside_id', 'Inside', True, 'commands/resources/plane_offset', globalInside)
+        inputs.addBoolValueInput('flip_id', 'Flip', True, 'commands/resources/command_icons/flip_allignment', globalFlip)
+        inputs.addBoolValueInput('inside_id', 'Inside', True, 'commands/resources/command_icons/plane_offset', globalInside)
 

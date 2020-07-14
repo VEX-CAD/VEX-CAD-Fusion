@@ -28,7 +28,7 @@ try:
             'cmd_id': 'modify_part',
             'workspace': 'FusionSolidEnvironment',
             'toolbar_panel_id': 'Modify',
-            'cmd_resources': 'modify_part',
+            'cmd_resources': 'command_icons/press_pull',
             'command_visible': True,
             'command_promoted': True,
         }
@@ -42,7 +42,7 @@ try:
             'cmd_id': 'simple_joint',
             'workspace': 'FusionSolidEnvironment',
             'toolbar_panel_id': 'Assemble',
-            'cmd_resources': 'better_joint',
+            'cmd_resources': 'command_icons/joint',
             'command_visible': True,
             'command_promoted': True,
         }
@@ -56,7 +56,7 @@ try:
             'cmd_id': 'set_attributes',
             'workspace': 'FusionSolidEnvironment',
             'toolbar_panel_id': 'Advanced',
-            'cmd_resources': 'set_attributes',
+            'cmd_resources': 'command_icons/edit',
             'command_visible': True,
             'command_promoted': True,
         }
@@ -70,7 +70,7 @@ try:
             'cmd_id': 'view_attributes',
             'workspace': 'FusionSolidEnvironment',
             'toolbar_panel_id': 'Advanced',
-            'cmd_resources': 'view_attributes',
+            'cmd_resources': 'command_icons/attributes',
             'command_visible': True,
             'command_promoted': True,
         }
