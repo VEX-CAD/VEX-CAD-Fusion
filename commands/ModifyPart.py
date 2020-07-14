@@ -43,12 +43,10 @@ def defineInputs():
             self.inputOffset = commandInputs.addFloatSpinnerCommandInput(self.id + 'Offset', 'Offset Holes', '', 0, 40, 1, 0)
         def show(self, parameter):
             self.parameter = parameter
-            # self.inputDistance.minimumValue = self.parameter['minValue']
-            # self.inputDistance.maximumValue = self.parameter['maxValue']
-            indexDistance = self.parameter['indexDistance']
-            indexOffset = self.parameter['indexOffset']
-            self.inputDistance.expression = str(inToHoles.value(selectedComp.modelParameters.item(indexDistance).expression))
-            self.inputOffset.expression = str(inToHoles.value(selectedComp.modelParameters.item(indexOffset).expression))
+            index_distance = self.parameter['index_distance']
+            index_offset = self.parameter['index_offset']
+            self.inputDistance.expression = str(inToHoles.value(selectedComp.modelParameters.item(index_distance).expression))
+            self.inputOffset.expression = str(inToHoles.value(selectedComp.modelParameters.item(index_offset).expression))
             
             self.inputDistance.isVisible = True
             self.inputOffset.isVisible = True
@@ -57,16 +55,35 @@ def defineInputs():
             self.inputDistance.isVisible = False
             self.inputOffset.isVisible = False
         def onUpdate(self):
-            if self.inputDistance.value > self.parameter['maxValue']:
-                self.inputDistance.value = self.parameter['maxValue']
+            if self.inputDistance.value > self.parameter['max_value']:
+                self.inputDistance.value = self.parameter['max_value']
 
-            if self.inputDistance.value + self.inputOffset.value > self.parameter['maxValue']:
-                self.inputOffset.value = self.parameter['maxValue'] - self.inputDistance.value
+            if self.inputDistance.value + self.inputOffset.value > self.parameter['max_value']:
+                self.inputOffset.value = self.parameter['max_value'] - self.inputDistance.value
         def updatePart(self, comp):
-            comp.modelParameters.item(self.parameter['indexDistance']).value = holesToIn.value(self.inputDistance.expression)
-            comp.modelParameters.item(self.parameter['indexOffset']).value = holesToIn.value(self.inputOffset.expression)
+            comp.modelParameters.item(self.parameter['index_distance']).value = holesToIn.value(self.inputDistance.expression)
+            comp.modelParameters.item(self.parameter['index_offset']).value = holesToIn.value(self.inputOffset.expression)
+    
+    class FloatSpinnerDistanceHoles_1_0_0(Input):
+        def create(self, commandInputs):
+            self.input = commandInputs.FloatSliderCommandInput (self.id + 'Distance', self.name, '', 0, 40, 1, 0)
+        def show(self, parameter):
+            self.parameter = parameter
+            index_distance = self.parameter['index_distance']
+            self.input.expression = str(inToHoles.value(selectedComp.modelParameters.item(index_distance).expression))
+            
+            self.input.isVisible = True
+            self.onUpdate()
+        def onUpdate(self):
+            if self.input.value > self.parameter['max_value']:
+                self.input.value = self.parameter['max_value']
+
+        def updatePart(self, comp):
+            comp.modelParameters.item(self.parameter['index_distance']).value = holesToIn.value(self.input.expression)
     
     return [
+        FloatSpinnerDistanceHoles('length_holes_1_0_0', 'Length Holes'),
+        FloatSpinnerDistanceHoles('width_holes_1_0_0', 'Width Holes'),
         FloatSpinnerDistanceOffsetHoles('FloatSpinnerDistanceOffsetHolesLength', 'Length Holes'),
         FloatSpinnerDistanceOffsetHoles('FloatSpinnerDistanceOffsetHolesWidth', 'Width Holes')]
 
@@ -85,23 +102,6 @@ def showSomeCommandInputs(parameters):
 def updateInputs(parameters):
     for parameter in parameters:
         allInputObjects[parameter].onUpdate()
-
-def updateModelParameter(comp, parameters):
-    comp.modelParameters.item(parameters['indexMP']).expression = parameters['value']
-
-def updateBodyBulbs(comp, parameters):
-    for key, value in parameters.items():
-        comp.bRepBodies.itemByName(key).isLightBulbOn = value
-
-def updateInserts(comp, parameters):
-    # print(parameters)
-    if parameters['value'] == 'None':
-        updateBodyBulbs(comp, {'Square Insert 1': False, 'Square Insert 2': False, 'Round Insert 1': False, 'Round Insert 2': False})
-    elif parameters['value'] == 'Square':
-        updateBodyBulbs(comp, {'Square Insert 1': True, 'Square Insert 2': True, 'Round Insert 1': False, 'Round Insert 2': False})
-    elif parameters['value'] == 'Round':
-        updateBodyBulbs(comp, {'Square Insert 1': False, 'Square Insert 2': False, 'Round Insert 1': True, 'Round Insert 2': True})
-
 
 def updatePart(comp, parameters):
     if 'parameters' in parameters:
@@ -128,7 +128,7 @@ class ModifyPart(apper.Fusion360CommandBase):
     def on_preview(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
 
         # updating highgly parts with 3000+ faces every change doesn't go well.
-        
+
         # updatePart(selectedComp, selectedCompAttributes)
         pass
 
@@ -155,8 +155,8 @@ class ModifyPart(apper.Fusion360CommandBase):
                     selectedComp = selectionInput.selection(0).entity.component
                 else: 
                     selectedComp = selectionInput.selection(0).entity
-                if selectedComp.attributes.count > 0 and selectedComp.attributes.itemByName('VFL', 'partData'):
-                    selectedCompAttributes = json.loads(selectedComp.attributes.itemByName('VFL', 'partData').value)
+                if selectedComp.attributes.count > 0 and selectedComp.attributes.itemByName('VFL', 'part_data'):
+                    selectedCompAttributes = json.loads(selectedComp.attributes.itemByName('VFL', 'part_data').value)
                     if 'parameters' in selectedCompAttributes:
                         showSomeCommandInputs(selectedCompAttributes['parameters'])
                 else:
@@ -188,7 +188,7 @@ class ModifyPart(apper.Fusion360CommandBase):
         default_units = ao.units_manager.defaultLengthUnits
 
         selectionInput = inputs.addSelectionInput('selection_input_id', 'Select Parametric Part', 'Component to select')
-        selectionInput.setSelectionLimits(1, 0)
+        selectionInput.setSelectionLimits(1, 1)
         selectionInput.addSelectionFilter('Occurrences')
 
         global allInputObjects

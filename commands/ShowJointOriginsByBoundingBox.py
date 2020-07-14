@@ -12,10 +12,16 @@ import math
 
 allInputObjects = []
 
+selectedComp = None
+selectedCompAttributes = None
+
+globalFlip = True
+
 # Class for a Fusion 360 Command
 # Place your program logic here
 # Delete the line that says 'pass' for any method you want to use
-class PointsToJointOrigins(apper.Fusion360CommandBase):
+class ShowJointOriginsByBoundingBox(apper.Fusion360CommandBase):
+    lastAngleValue = 0
 
     # Run whenever a user makes any change to a value or selection in the addin UI
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
@@ -37,24 +43,36 @@ class PointsToJointOrigins(apper.Fusion360CommandBase):
     def on_execute(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
         app = adsk.core.Application.get()
         ui = app.userInterface
+        
+        # Create a document.
+        # doc = app.documents.add(adsk.core.DocumentTypes.FusionDesignDocumentType)
  
         product = app.activeProduct
         design = adsk.fusion.Design.cast(product)
         vi = adsk.core.ValueInput
         
-        SelectionInput = input_values['selection_input_id']
-        for point in SelectionInput:
-            comp = point.parentSketch.parentComponent
-            geo = adsk.fusion.JointGeometry.createByPoint(point)
-            jointOrigin = comp.jointOrigins.createInput(geo)
-            comp.jointOrigins.add(jointOrigin)
+        selectionInput = inputs.itemById('selection_input_id')
+        if selectionInput.selection(0).entity.objectType == 'adsk::fusion::Occurrence':
+            comp = selectionInput.selection(0).entity.component
+        else: 
+            comp = selectionInput.selection(0).entity
+        for jointOrigin in comp.allJointOrigins:
+            # ui.messageBox(jointOrigin.name)
+            # isInside = comp.boundingBox.contains(jointOrigin.geometry.origin)
+            # ui.messageBox(comp.bRepBodies.itemByName('main').name)
+            box = comp.bRepBodies.itemByName('main').boundingBox
+            # box.expand(jointOrigin.geometry.origin)
+            isInside = box.contains(jointOrigin.geometry.origin)
+            # ui.messageBox(str(isInside))
+            jointOrigin.timelineObject.isSuppressed = not isInside
+            # jointOrigin.isLightBulbOn = isInside
         
 
     # Run when the user selects your command icon from the Fusion 360 UI
     # Typically used to create and display a command dialog box
     def on_create(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs):
 
-        SelectionInput = inputs.addSelectionInput('selection_input_id', 'Points', 'Select sketch points to place the Joint Origins')
-        SelectionInput.setSelectionLimits(1, 0)
-        SelectionInput.addSelectionFilter('SketchPoints')
+        selectionInput = inputs.addSelectionInput('selection_input_id', 'Component', 'Select Component')
+        selectionInput.setSelectionLimits(1, 1)
+        selectionInput.addSelectionFilter('Occurrences')
 

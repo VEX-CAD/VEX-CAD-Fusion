@@ -22,6 +22,7 @@ try:
     from .commands.SetAttributes import SetAttributes
     from .commands.ViewAttributes import ViewAttributes
     from .commands.PointsToJointOrigins import PointsToJointOrigins
+    from .commands.ShowJointOriginsByBoundingBox import ShowJointOriginsByBoundingBox
 
 
     # Create addin definition object
@@ -92,6 +93,20 @@ try:
                 'cmd_id': 'points_to_joint_origins',
                 'workspace': 'FusionSolidEnvironment',
                 'toolbar_panel_id': 'Advanced',
+                'cmd_resources': 'command_icons/joint_origin',
+                'command_visible': True,
+                'command_promoted': True,
+            }
+        )
+
+        addin.add_command(
+            'Show Joint Origins by Bounding Box',
+            ShowJointOriginsByBoundingBox,
+            {
+                'cmd_description': 'Set custom attributes for parts from the VEX CAD Library.\n\nSelect part component and input valid JSON string.',
+                'cmd_id': 'show_joint_origins_by_bounding_box',
+                'workspace': 'FusionSolidEnvironment',
+                'toolbar_panel_id': 'Modify',
                 'cmd_resources': 'command_icons/joint_origin',
                 'command_visible': True,
                 'command_promoted': True,

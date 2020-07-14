@@ -38,7 +38,7 @@ class ViewAttributes(apper.Fusion360CommandBase):
             else: 
                 entity = selectionInput.selection(0).entity
             if entity.attributes.count > 0:
-                textBox.text = entity.attributes.itemByName("VFL", "partData").value
+                textBox.text = entity.attributes.itemByName("VFL", "part_data").value
             else:
                 textBox.text = "The selection does not have any attributes"
         else:

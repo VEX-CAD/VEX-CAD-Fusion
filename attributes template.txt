@@ -1,0 +1,75 @@
+{
+	"partName": "5x25 Aluminum Plate",
+	"version": "1.0.0",
+	"parameters": {
+		"FloatSpinnerDistanceOffsetHolesLength": {
+			"indexOffset": 0,
+			"indexDistance": 1,
+			"minValue": 0.1,
+			"maxValue": 25
+		},
+		"FloatSpinnerDistanceOffsetHolesWidth": {
+			"indexDistance": 3,
+			"indexOffset": 2,
+			"minValue": 0.1,
+			"maxValue": 5
+		}
+	}
+}
+
+old
+{
+	"partName": "1x2x1x35 Aluminum C-Channel",
+	"version": "1.0.0",
+	"parameters": {
+		"FloatSpinnerDistanceOffsetHolesLength": {
+			"indexOffset": 0,
+			"indexDistance": 1,
+			"minValue": 0.1,
+			"maxValue": 35
+		}
+	}
+}
+
+new
+{
+	"partName": "1x2x1x35 Aluminum C-Channel",
+	"version": "1.0.0",
+	"parameters": {
+		"FloatSpinnerDistanceHolesLength": {
+			"indexDistance": 1,
+			"minValue": 0.1,
+			"maxValue": 35
+		}
+	}
+}
+
+{
+	"part_name": "1x2x1x35 Aluminum C-Channel",
+	"version": "1.0.0",
+	"parameters": {
+		"length_holes_1_0_0": {
+			"index": 1,
+			"min_value": 0.1,
+			"max_value": 35
+		}
+	}
+}
+
+profile planes:
+	length_start
+	length_distance
+
+sketches:
+	center_outside
+	center_inside
+	left_outside
+	left_inside
+	right_outside
+	right_inside
+
+parameters:
+	length_holes
+	max((length_distance / 0.5 in) + 0.4; 1)
+	length_holes_center
+	max((length_distance / 0.5 in ) - 0.1; 1)

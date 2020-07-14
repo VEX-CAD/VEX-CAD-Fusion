@@ -57,8 +57,8 @@ class SetAttributes(apper.Fusion360CommandBase):
                 entity = selectionInput.selection(0).entity
             try:
                 json.loads(jsonString)
-                entity.attributes.add("VFL", "partData", jsonString)
-                appliedAttributes = entity.attributes.itemByName("VFL", "partData").value
+                entity.attributes.add("VFL", "part_data", jsonString)
+                appliedAttributes = entity.attributes.itemByName("VFL", "part_data").value
                 ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
             except:
                 ao.ui.messageBox(jsonString + '\n\nis not a valid JSON string.', 'Invalid entry', 
