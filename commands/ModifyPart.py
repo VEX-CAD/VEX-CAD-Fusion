@@ -126,7 +126,11 @@ class ModifyPart(apper.Fusion360CommandBase):
     # Run whenever a user makes any change to a value or selection in the addin UI
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
     def on_preview(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
-        updatePart(selectedComp, selectedCompAttributes)
+
+        # updating highgly parts with 3000+ faces every change doesn't go well.
+        
+        # updatePart(selectedComp, selectedCompAttributes)
+        pass
 
     # Run after the command is finished.
     # Can be used to launch another command automatically or do other clean up.

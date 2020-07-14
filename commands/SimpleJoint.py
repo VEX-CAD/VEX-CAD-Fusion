@@ -16,21 +16,20 @@ selectedComp = None
 selectedCompAttributes = None
 
 globalFlip = True
-globalInside = False
 
 # Class for a Fusion 360 Command
 # Place your program logic here
 # Delete the line that says 'pass' for any method you want to use
 class SimpleJoint(apper.Fusion360CommandBase):
-    # self.lastAngleValue = 0
+    lastAngleValue = 0
 
     # Run whenever a user makes any change to a value or selection in the addin UI
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
     def on_preview(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
         if len(input_values['selection_input_id']) == 2:
-            # angle = inputs.itemById('angle_id')
+            angle = inputs.itemById('angle_id')
             # if changed_input == angle:
-            #     if angle.value != self.lastAngleValue
+            #     if angle.value != self.lastAngleValue:
             #         self.lastAngleValue = angle.value
             #         self.on_execute(command, inputs, args, input_values)
             # else:
@@ -71,20 +70,7 @@ class SimpleJoint(apper.Fusion360CommandBase):
             yDirection = point.parentSketch.yDirection
             angle.setManipulator(point.worldGeometry, xDirection, yDirection)
             angle.isVisible = True
-            if changed_input == angle:
-                # print((int(angle.value / math.tau * 4 + 0.5) % 4) * math.tau)
-                # angle.value = (int(angle.value / math.tau * 4 + 0.5) % 4) * math.tau
-                # if angle.value > math.pi * 2 - math.pi * 0.25:
-                #     angle.value = math.pi * 2
-                # elif angle.value > math.pi * 1.5 - math.pi * 0.25:
-                #     angle.value = math.pi  * 1.5
-                # elif angle.value > math.pi * 1 - math.pi * 0.25:
-                #     angle.value = math.pi * 1
-                # elif angle.value > math.pi * 0.5 - math.pi * 0.25:
-                #     angle.value = math.pi * 0.5
-                # else:
-                    # angle.value = 0
-                
+            if changed_input == angle:                
                 for multiplier in range(8, -1, -1):
                     if angle.value > math.pi * multiplier / 4 - math.pi / 8:
                         angle.value = math.pi * multiplier / 4
@@ -129,26 +115,7 @@ class SimpleJoint(apper.Fusion360CommandBase):
         joints = rootComp.joints
         jointInput = joints.createInput(geo0, geo1)
         
-        # Set the joint input
-        # if Rotate.listItems.item(0).isSelected:
-        #     angle = vi.createByString('90 deg')
-        # elif Rotate.listItems.item(1).isSelected:
-        #     angle = vi.createByString('0 deg')
-        # elif Rotate.listItems.item(2).isSelected:
-        #     angle = vi.createByString('180 deg')
-        # elif Rotate.listItems.item(3).isSelected:
-        #     angle = vi.createByString('270 deg')
-        # jointInput.angle = angle
         jointInput.angle = vi.createByReal(inputs.itemById('angle_id').value)
-        # jointInput.angle = vi.createByReal(input_values['angle_id'])
-
-        global globalInside
-        globalInside = input_values['inside_id']
-        if input_values['inside_id']:
-            offset = '-0.063 in'
-        else:
-            offset = '0'
-        jointInput.offset = vi.createByString(offset)
         global globalFlip
         globalFlip = input_values['flip_id']
         jointInput.isFlipped = input_values['flip_id']
@@ -171,14 +138,13 @@ class SimpleJoint(apper.Fusion360CommandBase):
         # Create a default value using a string
         default_value = adsk.core.ValueInput.createByString('1.0 in')
 
-        # Get teh user's current units
+        # Get the user's current units
         default_units = ao.units_manager.defaultLengthUnits
 
-        SelectionInput = inputs.addSelectionInput('selection_input_id', 'Select points on part to move', 'Points to select')
+        SelectionInput = inputs.addSelectionInput('selection_input_id', 'Points', 'Select a sketch point to place the Joint Origin')
         SelectionInput.setSelectionLimits(2, 2)
         SelectionInput.addSelectionFilter('SketchPoints')
         angle = inputs.addAngleValueCommandInput('angle_id', 'Angle', adsk.core.ValueInput.createByString('0 deg'))
         angle.isVisible = False
         inputs.addBoolValueInput('flip_id', 'Flip', True, 'commands/resources/command_icons/flip_allignment', globalFlip)
-        inputs.addBoolValueInput('inside_id', 'Inside', True, 'commands/resources/command_icons/plane_offset', globalInside)
 

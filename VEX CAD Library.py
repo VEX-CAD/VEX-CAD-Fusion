@@ -34,8 +34,10 @@ try:
         }
     )
 
+    # uncomment to try out the beta Simple Joint tool.
+
     addin.add_command(
-        'Simple Joint',
+        'Simple Joint (beta)',
         SimpleJoint,
         {
             'cmd_description': 'An easier to use joint tool for connecting VEX parts',
