@@ -10,14 +10,11 @@ from apper import AppObjects
 
 import json
 
-import VflFunctions
+import vex_cad
 
-allInputObjects = []
+allParameterManagers = []
 
-selectedComp = None
-selectedCompAttributes = None
-
-def defineInputs():
+def defineParameterManagers():
     ao = AppObjects()
     unitsMgr = ao.units_manager
 
@@ -30,104 +27,75 @@ def defineInputs():
     inToHoles = ConvertCustomUnits('/0.5in')
     holesToIn = ConvertCustomUnits('*0.5in')
 
-    class Input:
+    class ParameterManager:
         def __init__(self, id, name):
             self.id = id
             self.name = name
+        # Defaults
         def hide(self):
-            self.input.isVisible = False
-        def onUpdate(self):
+            self.commandInput.isVisible = False
+        def onUpdate(self, comp):
             pass
 
-    class FloatSpinnerDistanceOffsetHolesV1(Input):
+        # Need to be redefined
         def create(self, commandInputs):
-            self.inputDistance = commandInputs.addFloatSpinnerCommandInput(self.id + 'Distance', self.name, '', 0, 35, 1, 0)
-            self.inputOffset = commandInputs.addFloatSpinnerCommandInput(self.id + 'Offset', 'Offset Holes', '', 0, 35, 1, 0)
-        def show(self, parameter):
-            self.parameter = parameter
-            index_distance = self.parameter['index_distance']
-            index_offset = self.parameter['index_offset']
-            self.inputDistance.expression = str(inToHoles.value(selectedComp.modelParameters.item(index_distance).expression))
-            self.inputOffset.expression = str(inToHoles.value(selectedComp.modelParameters.item(index_offset).expression))
-            
-            self.inputDistance.isVisible = True
-            self.inputOffset.isVisible = True
-            self.onUpdate()
-        def hide(self):
-            self.inputDistance.isVisible = False
-            self.inputOffset.isVisible = False
-        def onUpdate(self):
-            if self.inputDistance.value > self.parameter['max_value']:
-                self.inputDistance.value = self.parameter['max_value']
-
-            if self.inputDistance.value + self.inputOffset.value > self.parameter['max_value']:
-                self.inputOffset.value = self.parameter['max_value'] - self.inputDistance.value
+            pass
+        def show(self, comp):
+            pass
         def updatePart(self, comp):
-            comp.modelParameters.item(self.parameter['index_distance']).value = holesToIn.value(self.inputDistance.expression)
-            comp.modelParameters.item(self.parameter['index_offset']).value = holesToIn.value(self.inputOffset.expression)
+            pass
     
-    class FloatSpinnerDistanceHolesV1(Input):
+    class FloatSpinnerDistanceHolesV1(ParameterManager):
         def create(self, commandInputs):
-            self.input = commandInputs.addFloatSpinnerCommandInput(self.id + 'Distance', self.name, '', 0, 35, 1, 0)
-        def show(self, parameter):
-            self.parameter = parameter
-            index = self.parameter['index']
-            self.input.expression = str(inToHoles.value(selectedComp.modelParameters.item(index).expression))
+            self.commandInput = commandInputs.addFloatSpinnerCommandInput(self.id, self.name, '', 1, 35, 1, 1)
+        def show(self, comp):
+            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
+            index = parameter['index']
+            self.commandInput.expression = str(inToHoles.value(comp.modelParameters.item(index).expression))
             
-            self.input.isVisible = True
-            self.onUpdate()
-        def onUpdate(self):
-            if self.input.value > self.parameter['max_value']:
-                self.input.value = self.parameter['max_value']
+            self.commandInput.isVisible = True
+            self.onUpdate(comp)
+        def onUpdate(self, comp):
+            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
+            if self.commandInput.value > parameter['max_value']:
+                self.commandInput.value = parameter['max_value']
 
         def updatePart(self, comp):
-            comp.modelParameters.item(self.parameter['index']).value = holesToIn.value(self.input.expression)
-    
-    # class BoolGeometryToggleV1(Input):
-    #     def create(self, commandInputs):
-    #         self.input = commandInputs.addFloatSpinnerCommandInput(self.id + 'Distance', self.name, '', 0, 35, 1, 0)
-    #     def show(self, parameter):
-    #         self.parameter = parameter
-    #         index = self.parameter['index']
-    #         self.input.expression = str(inToHoles.value(selectedComp.modelParameters.item(index).expression))
-            
-    #         self.input.isVisible = True
-    #         self.onUpdate()
-    #     def onUpdate(self):
-    #         if self.input.value > self.parameter['max_value']:
-    #             self.input.value = self.parameter['max_value']
-
-    #     def updatePart(self, comp):
-    #         comp.modelParameters.item(self.parameter['index']).value = holesToIn.value(self.input.expression)
+            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
+            comp.modelParameters.item(parameter['index']).value = holesToIn.value(self.commandInput.expression)
     
     return [
-        # BoolGeometryToggleV1('geometry_toggle_1_0_0', 'Detailed Geometry'),
+        # FloatSpinnerDistanceOffsetHolesV1('length_holes_offset_v1', 'Length Holes'),
+        # FloatSpinnerDistanceOffsetHolesV1('width_holes_offset_v1', 'Width Holes'),
         FloatSpinnerDistanceHolesV1('length_holes_v1', 'Length Holes'),
-        FloatSpinnerDistanceHolesV1('width_holes_v1', 'Width Holes'),
-        FloatSpinnerDistanceOffsetHolesV1('length_holes_offset_v1', 'Length Holes'),
-        FloatSpinnerDistanceOffsetHolesV1('width_holes_offset_v1', 'Width Holes')]
+        FloatSpinnerDistanceHolesV1('width_holes_v1', 'Width Holes')]
 
 
 def createAllCommandInputs(commandInputs):
-    pass
+    global allParameterManagers
+    allParameterManagers = {parameterManager.id: parameterManager for parameterManager in defineParameterManagers()}
+    for parameterManager in allParameterManagers:
+        allParameterManagers[parameterManager].create(commandInputs)
 
 def hideAllCommandInputs():
-    for input in allInputObjects:
-        allInputObjects[input].hide()
+    for parameterManager in allParameterManagers:
+        allParameterManagers[parameterManager].hide()
 
-def showSomeCommandInputs(parameters):
-    for parameter in parameters:
-        if parameter in allInputObjects:
-            allInputObjects[parameter].show(parameters[parameter])
+def parameterManagersInParameters(comp):
+    parameters = vex_cad.getPartData(comp)['parameters']
+    return [allParameterManagers[parameter] for parameter in parameters if parameter in allParameterManagers]
 
-def updateInputs(parameters):
-    for parameter in parameters:
-        allInputObjects[parameter].onUpdate()
+def showSomeCommandInputs(comp):
+    for parameterManager in parameterManagersInParameters(comp):
+        parameterManager.show(comp)
 
-def updatePart(comp, parameters):
-    if 'parameters' in parameters:
-        for parameter in parameters['parameters']:
-            allInputObjects[parameter].updatePart(comp)
+def updateInputs(comp):
+    for parameterManager in parameterManagersInParameters(comp):
+        parameterManager.onUpdate(comp)
+
+def updatePart(comp):
+    for parameterManager in parameterManagersInParameters(comp):
+        parameterManager.updatePart(comp)
 
 
 
@@ -148,9 +116,7 @@ class ModifyPart(apper.Fusion360CommandBase):
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
     def on_preview(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
 
-        # updating highgly parts with 3000+ faces every change doesn't go well.
-
-        # updatePart(selectedComp, selectedCompAttributes)
+        # updating parts with 1600+ faces every change doesn't go well.
         pass
 
     # Run after the command is finished.
@@ -163,43 +129,34 @@ class ModifyPart(apper.Fusion360CommandBase):
     def on_input_changed(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, changed_input, input_values):
         
         app = adsk.core.Application.get()
-        global selectedComp
-        global selectedCompAttributes
-
 
         selectionInput = inputs.itemById('selection_input_id')
 
         selectionInput = inputs.itemById('selection_input_id')
-        if changed_input.id == 'selection_input_id':
-            if selectionInput.selectionCount > 0:
-                if selectionInput.selection(0).entity.objectType == 'adsk::fusion::Occurrence':
-                    selectedComp = selectionInput.selection(0).entity.component
-                else: 
-                    selectedComp = selectionInput.selection(0).entity
-                if selectedComp.attributes.count > 0 and selectedComp.attributes.itemByName('VFL', 'part_data'):
-                    selectedCompAttributes = json.loads(selectedComp.attributes.itemByName('VFL', 'part_data').value)
+        if selectionInput.selectionCount > 0:
+            selectedComp = vex_cad.getCompIfOccurrence(selectionInput.selection(0).entity)
+            if selectedComp.attributes.itemByName('vex_cad', 'part_data'):
+                selectedCompAttributes = vex_cad.getPartData(selectedComp)
+                if changed_input.id == 'selection_input_id':
                     if 'parameters' in selectedCompAttributes:
-                        showSomeCommandInputs(selectedCompAttributes['parameters'])
+                        showSomeCommandInputs(selectedComp)
                 else:
-                    selectionInput.clearSelection()
+                    if 'parameters' in selectedCompAttributes:
+                        updateInputs(selectedComp)
             else:
                 selectionInput.clearSelection()
-                selectedCompAttributes.clear()
-                hideAllCommandInputs()
         else:
-            if 'parameters' in selectedCompAttributes:
-                updateInputs(selectedCompAttributes['parameters'])
+            hideAllCommandInputs()
 
     # Run when the user presses OK
     # This is typically where your main program logic would go
     def on_execute(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
         selectionInput = inputs.itemById('selection_input_id')
-        selectedEntity =selectionInput.selection(0).entity
+        selectedEntity = selectionInput.selection(0).entity
         if selectedEntity.objectType == 'adsk::fusion::Occurrence' and selectedEntity.isReferencedComponent:
             selectedEntity.breakLink()
-            # while selectedEntity.isReferencedComponent:
-            #     pass
-        updatePart(VflFunctions.getCompIfOccurrence(selectedEntity), selectedCompAttributes)
+        comp = vex_cad.getCompIfOccurrence(selectedEntity)
+        updatePart(comp)
 
     # Run when the user selects your command icon from the Fusion 360 UI
     # Typically used to create and display a command dialog box
@@ -217,9 +174,6 @@ class ModifyPart(apper.Fusion360CommandBase):
         selectionInput.setSelectionLimits(1, 1)
         selectionInput.addSelectionFilter('Occurrences')
 
-        global allInputObjects
-        allInputObjects = {inputObjects.id: inputObjects for inputObjects in defineInputs()}
-        for inputObject in allInputObjects:
-            allInputObjects[inputObject].create(inputs)
+        createAllCommandInputs(inputs)
         hideAllCommandInputs()
 

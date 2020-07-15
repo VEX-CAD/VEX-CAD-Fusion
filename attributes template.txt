@@ -15,7 +15,7 @@
 }
 
 
-
+Normal C-Channels:
 {
     "version": "1.0.0",
     "parameters": {
@@ -26,6 +26,7 @@
         }
     }
 }
+
 
 {
     "version": "1.0.0",
@@ -38,6 +39,8 @@
         }
     }
 }
+
+
 
 profile planes:
 	length_start
