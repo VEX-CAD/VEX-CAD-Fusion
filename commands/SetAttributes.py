@@ -10,6 +10,7 @@ from apper import AppObjects
 
 import json, uuid
 
+import VflFunctions
 
 # Class for a Fusion 360 Command
 # Place your program logic here
@@ -52,13 +53,10 @@ class SetAttributes(apper.Fusion360CommandBase):
         attributesJson = json.dumps(attributesDict)
         selectionInput = inputs.itemById('selection_input_id')
         if selectionInput.selectionCount > 0:
-            if selectionInput.selection(0).entity.objectType == 'adsk::fusion::Occurrence':
-                entity = selectionInput.selection(0).entity.component
-            else: 
-                entity = selectionInput.selection(0).entity
-                entity.attributes.add("VFL", "part_data", attributesJson)
-                appliedAttributes = entity.attributes.itemByName("VFL", "part_data").value
-                ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
+            entity = VflFunctions.getCompIfOccurrence(selectionInput.selection(0).entity)
+            entity.attributes.add("VFL", "part_data", attributesJson)
+            appliedAttributes = entity.attributes.itemByName("VFL", "part_data").value
+            ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
 
 
     # Run when the user selects your command icon from the Fusion 360 UI

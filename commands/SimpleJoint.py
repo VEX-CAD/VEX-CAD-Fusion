@@ -10,11 +10,6 @@ from apper import AppObjects
 
 import math
 
-allInputObjects = []
-
-selectedComp = None
-selectedCompAttributes = None
-
 globalFlip = True
 
 # Class for a Fusion 360 Command

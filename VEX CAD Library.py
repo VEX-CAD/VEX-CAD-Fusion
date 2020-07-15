@@ -9,7 +9,8 @@ sys.path.insert(0, app_path)
 sys.path.insert(0, os.path.join(app_path, 'apper'))
 
 # Set to True to use beta and development features
-unreleasedFeatures = True
+developmentFeatures = True
+unreleasedFeatures = False
 # Set to True to display various useful messages when debugging
 debug = False
 
@@ -42,21 +43,7 @@ try:
         }
     )
 
-    if unreleasedFeatures:
-        addin.add_command(
-            'Simple Joint (beta)',
-            SimpleJoint,
-            {
-                'cmd_description': 'An easier to use joint tool for connecting VEX parts',
-                'cmd_id': 'simple_joint',
-                'workspace': 'FusionSolidEnvironment',
-                'toolbar_panel_id': 'Assemble',
-                'cmd_resources': 'command_icons/joint',
-                'command_visible': True,
-                'command_promoted': True,
-            }
-        )
-
+    if developmentFeatures:
         addin.add_command(
             'Set Attributes',
             SetAttributes,
@@ -64,7 +51,7 @@ try:
                 'cmd_description': 'Set custom attributes for parts from the VEX CAD Library.\n\nSelect part component and input valid JSON string.',
                 'cmd_id': 'set_attributes',
                 'workspace': 'FusionSolidEnvironment',
-                'toolbar_panel_id': 'Advanced',
+                'toolbar_panel_id': 'Development',
                 'cmd_resources': 'command_icons/edit',
                 'command_visible': True,
                 'command_promoted': True,
@@ -78,8 +65,23 @@ try:
                 'cmd_description': 'View custom attributes for parts from the VEX CAD Library.',
                 'cmd_id': 'view_attributes',
                 'workspace': 'FusionSolidEnvironment',
-                'toolbar_panel_id': 'Advanced',
+                'toolbar_panel_id': 'Development',
                 'cmd_resources': 'command_icons/attributes',
+                'command_visible': True,
+                'command_promoted': True,
+            }
+        )
+
+    if unreleasedFeatures:
+        addin.add_command(
+            'Simple Joint (beta)',
+            SimpleJoint,
+            {
+                'cmd_description': 'An easier to use joint tool for connecting VEX parts',
+                'cmd_id': 'simple_joint',
+                'workspace': 'FusionSolidEnvironment',
+                'toolbar_panel_id': 'Assemble',
+                'cmd_resources': 'command_icons/joint',
                 'command_visible': True,
                 'command_promoted': True,
             }

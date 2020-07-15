@@ -10,7 +10,6 @@ from apper import AppObjects
 
 import math
 
-allInputObjects = []
 
 # Class for a Fusion 360 Command
 # Place your program logic here

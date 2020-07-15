@@ -10,6 +10,8 @@ from apper import AppObjects
 
 import json
 
+import VflFunctions
+
 allInputObjects = []
 
 selectedComp = None
@@ -37,7 +39,7 @@ def defineInputs():
         def onUpdate(self):
             pass
 
-    class FloatSpinnerDistanceOffsetHoles_1_0_0(Input):
+    class FloatSpinnerDistanceOffsetHolesV1(Input):
         def create(self, commandInputs):
             self.inputDistance = commandInputs.addFloatSpinnerCommandInput(self.id + 'Distance', self.name, '', 0, 35, 1, 0)
             self.inputOffset = commandInputs.addFloatSpinnerCommandInput(self.id + 'Offset', 'Offset Holes', '', 0, 35, 1, 0)
@@ -64,7 +66,7 @@ def defineInputs():
             comp.modelParameters.item(self.parameter['index_distance']).value = holesToIn.value(self.inputDistance.expression)
             comp.modelParameters.item(self.parameter['index_offset']).value = holesToIn.value(self.inputOffset.expression)
     
-    class FloatSpinnerDistanceHoles_1_0_0(Input):
+    class FloatSpinnerDistanceHolesV1(Input):
         def create(self, commandInputs):
             self.input = commandInputs.addFloatSpinnerCommandInput(self.id + 'Distance', self.name, '', 0, 35, 1, 0)
         def show(self, parameter):
@@ -81,11 +83,29 @@ def defineInputs():
         def updatePart(self, comp):
             comp.modelParameters.item(self.parameter['index']).value = holesToIn.value(self.input.expression)
     
+    # class BoolGeometryToggleV1(Input):
+    #     def create(self, commandInputs):
+    #         self.input = commandInputs.addFloatSpinnerCommandInput(self.id + 'Distance', self.name, '', 0, 35, 1, 0)
+    #     def show(self, parameter):
+    #         self.parameter = parameter
+    #         index = self.parameter['index']
+    #         self.input.expression = str(inToHoles.value(selectedComp.modelParameters.item(index).expression))
+            
+    #         self.input.isVisible = True
+    #         self.onUpdate()
+    #     def onUpdate(self):
+    #         if self.input.value > self.parameter['max_value']:
+    #             self.input.value = self.parameter['max_value']
+
+    #     def updatePart(self, comp):
+    #         comp.modelParameters.item(self.parameter['index']).value = holesToIn.value(self.input.expression)
+    
     return [
-        FloatSpinnerDistanceHoles_1_0_0('length_holes_1_0_0', 'Length Holes'),
-        FloatSpinnerDistanceHoles_1_0_0('width_holes_1_0_0', 'Width Holes'),
-        FloatSpinnerDistanceOffsetHoles_1_0_0('length_holes_offset_1_0_0', 'Length Holes'),
-        FloatSpinnerDistanceOffsetHoles_1_0_0('width_holes_offset_1_0_0', 'Width Holes')]
+        # BoolGeometryToggleV1('geometry_toggle_1_0_0', 'Detailed Geometry'),
+        FloatSpinnerDistanceHolesV1('length_holes_v1', 'Length Holes'),
+        FloatSpinnerDistanceHolesV1('width_holes_v1', 'Width Holes'),
+        FloatSpinnerDistanceOffsetHolesV1('length_holes_offset_v1', 'Length Holes'),
+        FloatSpinnerDistanceOffsetHolesV1('width_holes_offset_v1', 'Width Holes')]
 
 
 def createAllCommandInputs(commandInputs):
@@ -97,7 +117,8 @@ def hideAllCommandInputs():
 
 def showSomeCommandInputs(parameters):
     for parameter in parameters:
-        allInputObjects[parameter].show(parameters[parameter])
+        if parameter in allInputObjects:
+            allInputObjects[parameter].show(parameters[parameter])
 
 def updateInputs(parameters):
     for parameter in parameters:
@@ -172,8 +193,13 @@ class ModifyPart(apper.Fusion360CommandBase):
     # Run when the user presses OK
     # This is typically where your main program logic would go
     def on_execute(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
-
-        updatePart(selectedComp, selectedCompAttributes)
+        selectionInput = inputs.itemById('selection_input_id')
+        selectedEntity =selectionInput.selection(0).entity
+        if selectedEntity.objectType == 'adsk::fusion::Occurrence' and selectedEntity.isReferencedComponent:
+            selectedEntity.breakLink()
+            # while selectedEntity.isReferencedComponent:
+            #     pass
+        updatePart(VflFunctions.getCompIfOccurrence(selectedEntity), selectedCompAttributes)
 
     # Run when the user selects your command icon from the Fusion 360 UI
     # Typically used to create and display a command dialog box
