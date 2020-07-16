@@ -209,20 +209,20 @@ class ModifyPart(apper.Fusion360CommandBase):
         if selectionInput.selectionCount > 0:
             selectedEntity = selectionInput.selection(0).entity
             selectedComp = vex_cad.getCompIfOccurrence(selectedEntity)
-            for i in range(3):
+            for i in range(2):
                 if selectedComp.attributes.itemByName('vex_cad', 'part_data') and 'parameters' in vex_cad.getPartData(selectedComp):
                     if changed_input.id == 'selection_input_id':
+                        hideAllCommandInputs()
                         showSomeCommandInputs(selectedComp)
                         if selectionInput.selectionCount == 0:
-                            # ao.ui.messageBox(str(selectedEntity))
                             selectionInput.addSelection(selectedEntity)
                     else:
                         updateInputs(selectedComp)
                 else:
                     selectionInput.clearSelection()
-                    if selectedEntity.objectType == 'adsk::fusion::Occurrence':
+                    if selectedEntity.objectType == 'adsk::fusion::Occurrence' and '+' in selectedEntity.fullPathName:
                         selectedEntity = selectedEntity.assemblyContext
-                        selectedComp = vex_cad.getCompIfOccurrence(selectedEntity)
+                        selectedComp = selectedEntity.component
         else:
             hideAllCommandInputs()
 
