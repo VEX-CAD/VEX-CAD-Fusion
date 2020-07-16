@@ -15,7 +15,6 @@
 }
 
 
-Normal C-Channels:
 {
     "version": "1.0.0",
     "parameters": {
@@ -26,21 +25,6 @@ Normal C-Channels:
         }
     }
 }
-
-
-{
-    "version": "1.0.0",
-    "parameters": {
-        "length_holes_offset_v1": {
-            "index_offset": 0,
-            "index_distance": 1,
-            "min_value": 1,
-            "max_value": 35
-        }
-    }
-}
-
-
 
 profile planes:
 	length_start

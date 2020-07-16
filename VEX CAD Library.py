@@ -13,20 +13,26 @@ developmentFeatures = True
 unreleasedFeatures = False
 # Set to True to display various useful messages when debugging
 debug = False
+# global addin
 
 try:
     import config
     import apper
 
     from .commands.ModifyPart import ModifyPart
+    from .commands.ModifyPart import FusionImportCommandStartedEvent
+    from .commands.ModifyPart import FusionMoveCommandEndedEvent
     from .commands.SimpleJoint import SimpleJoint
     from .commands.SetAttributes import SetAttributes
     from .commands.ViewAttributes import ViewAttributes
     from .commands.PointsToJointOrigins import PointsToJointOrigins
     from .commands.ShowJointOriginsByBoundingBox import ShowJointOriginsByBoundingBox
 
+    app = adsk.core.Application.cast(adsk.core.Application.get())
+    ui = app.userInterface
 
     # Create addin definition object
+    # global addin
     addin = apper.FusionApp(config.app_name, config.company_name, False)
 
     addin.add_command(
@@ -42,6 +48,21 @@ try:
             'command_promoted': True,
         }
     )
+    # addin.commands[0].on_run()
+    # addin.commands[0].on_create(adsk.core.Command, adsk.core.CommandInputs)
+    # apper._CommandCreatedEventHandler(addin.commands[0])
+    # _get_create_event
+    # ui.commandDefinitions.itemById('Extrude').execute()
+    # ui.commandDefinitions.itemById(' VEX CAD_VEX CAD Library_modify_part').execute()
+    # ui.commandDefinitions.item(397).execute()
+    # ui.commandDefinitions.itemById(addin.commands[0].id).execute()
+    # for i in range(2200, ui.commandDefinitions.count):
+    #     print(str(i) + ': ' + ui.commandDefinitions.item(i).id)
+
+    # ui.messageBox(ui.commandDefinitions.itemById(modify_part).id)
+    # ui.messageBox(str(ui.commandDefinitions))
+    addin.add_command_event("FusionImportCommandStartedEvent", app.userInterface.commandStarting, FusionImportCommandStartedEvent)
+    addin.add_command_event("FusionMoveCommandEndedEvent", app.userInterface.commandTerminated, FusionMoveCommandEndedEvent)
 
     if developmentFeatures:
         addin.add_command(
@@ -115,8 +136,7 @@ try:
             }
         )
 
-    app = adsk.core.Application.cast(adsk.core.Application.get())
-    ui = app.userInterface
+
 
 except:
     app = adsk.core.Application.get()

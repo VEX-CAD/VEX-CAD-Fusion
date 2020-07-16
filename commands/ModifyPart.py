@@ -4,11 +4,14 @@ import adsk.cam
 
 # Import the entire apper package
 import apper
+import config
 
 # Alternatively you can import a specific function or class
 from apper import AppObjects
 
 import json
+# from .modules import keyboard
+import keyboard
 
 import vex_cad
 
@@ -88,6 +91,7 @@ def parameterManagersInParameters(comp):
 def showSomeCommandInputs(comp):
     for parameterManager in parameterManagersInParameters(comp):
         parameterManager.show(comp)
+    keyboard.press_and_release('tab')
 
 def updateInputs(comp):
     for parameterManager in parameterManagersInParameters(comp):
@@ -111,6 +115,7 @@ def updatePart(comp):
 # Place your program logic here
 # Delete the line that says 'pass' for any method you want to use
 class ModifyPart(apper.Fusion360CommandBase):
+    
 
     # Run whenever a user makes any change to a value or selection in the addin UI
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
@@ -137,11 +142,10 @@ class ModifyPart(apper.Fusion360CommandBase):
             selectedComp = vex_cad.getCompIfOccurrence(selectionInput.selection(0).entity)
             if selectedComp.attributes.itemByName('vex_cad', 'part_data'):
                 selectedCompAttributes = vex_cad.getPartData(selectedComp)
-                if changed_input.id == 'selection_input_id':
-                    if 'parameters' in selectedCompAttributes:
+                if 'parameters' in selectedCompAttributes:
+                    if changed_input.id == 'selection_input_id':
                         showSomeCommandInputs(selectedComp)
-                else:
-                    if 'parameters' in selectedCompAttributes:
+                    else:
                         updateInputs(selectedComp)
             else:
                 selectionInput.clearSelection()
@@ -170,6 +174,7 @@ class ModifyPart(apper.Fusion360CommandBase):
         # Get teh user's current units
         default_units = ao.units_manager.defaultLengthUnits
 
+
         selectionInput = inputs.addSelectionInput('selection_input_id', 'Select Parametric Part', 'Component to select')
         selectionInput.setSelectionLimits(1, 1)
         selectionInput.addSelectionFilter('Occurrences')
@@ -177,3 +182,39 @@ class ModifyPart(apper.Fusion360CommandBase):
         createAllCommandInputs(inputs)
         hideAllCommandInputs()
 
+        global importingPart
+        global importedPart
+        if importingPart:
+            if importedPart.component.attributes.itemByName('vex_cad', 'part_data'):
+                importedCompAttributes = vex_cad.getPartData(importedPart.component)
+                if 'parameters' in importedCompAttributes:
+                    selectionInput.addSelection(importedPart)
+                    showSomeCommandInputs(importedPart.component)
+            importingPart = False
+
+
+
+importingPart = False
+occListBeforeImport = []
+# occListAfterImport = []
+importedPart = None
+
+class FusionImportCommandStartedEvent(apper.Fusion360CommandEvent):
+
+    def command_event_received(self, event_args, command_id, command_definition):
+        ao = apper.AppObjects()
+        if command_id == 'FusionImportCommand':
+            global importingPart
+            importingPart = True
+        if command_id == 'FusionMoveCommand':
+            global importedPart
+            importedPart = ao.ui.activeSelections.item(0).entity
+
+class FusionMoveCommandEndedEvent(apper.Fusion360CommandEvent):
+
+    def command_event_received(self, event_args, command_id, command_definition):
+        ao = apper.AppObjects()
+        if command_id == 'FusionMoveCommand':
+            if importingPart:
+                modify_part = ao.ui.commandDefinitions.itemById(' VEX CAD_VEX CAD Library_modify_part')
+                modify_part.execute()
