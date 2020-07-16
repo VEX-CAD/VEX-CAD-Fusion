@@ -20,8 +20,8 @@ try:
     import apper
 
     from .commands.ModifyPart import ModifyPart
-    from .commands.ModifyPart import FusionImportCommandStartedEvent
-    from .commands.ModifyPart import FusionMoveCommandEndedEvent
+    from .commands.ModifyPart import ModifyPartExternalCommandStarted
+    from .commands.ModifyPart import ModifyPartExternalCommandEnded
     from .commands.SimpleJoint import SimpleJoint
     from .commands.SetAttributes import SetAttributes
     from .commands.ViewAttributes import ViewAttributes
@@ -48,21 +48,8 @@ try:
             'command_promoted': True,
         }
     )
-    # addin.commands[0].on_run()
-    # addin.commands[0].on_create(adsk.core.Command, adsk.core.CommandInputs)
-    # apper._CommandCreatedEventHandler(addin.commands[0])
-    # _get_create_event
-    # ui.commandDefinitions.itemById('Extrude').execute()
-    # ui.commandDefinitions.itemById(' VEX CAD_VEX CAD Library_modify_part').execute()
-    # ui.commandDefinitions.item(397).execute()
-    # ui.commandDefinitions.itemById(addin.commands[0].id).execute()
-    # for i in range(2200, ui.commandDefinitions.count):
-    #     print(str(i) + ': ' + ui.commandDefinitions.item(i).id)
-
-    # ui.messageBox(ui.commandDefinitions.itemById(modify_part).id)
-    # ui.messageBox(str(ui.commandDefinitions))
-    addin.add_command_event("FusionImportCommandStartedEvent", app.userInterface.commandStarting, FusionImportCommandStartedEvent)
-    addin.add_command_event("FusionMoveCommandEndedEvent", app.userInterface.commandTerminated, FusionMoveCommandEndedEvent)
+    addin.add_command_event("FusionImportCommandStartedEvent", app.userInterface.commandStarting, ModifyPartExternalCommandStarted)
+    addin.add_command_event("FusionMoveCommandEndedEvent", app.userInterface.commandTerminated, ModifyPartExternalCommandEnded)
 
     if developmentFeatures:
         addin.add_command(

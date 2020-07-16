@@ -27,19 +27,71 @@
 }
 
 profile planes:
-	length_start
-	length_distance
+length_start
+length_distance
 
 sketches:
-	center_outside
-	center_inside
-	left_outside
-	left_inside
-	right_outside
-	right_inside
+center_outside
+center_inside
+left_outside
+left_inside
+right_outside
+right_inside
 
 parameters:
-	length_holes
-	max((length_distance / 0.5 in) + 0.4; 1)
-	length_holes_center
-	max((length_distance / 0.5 in ) - 0.1; 1)
+length_holes
+max((length_distance / 0.5 in) + 0.4; 1)
+length_holes_center
+max((length_distance / 0.5 in ) - 0.1; 1)
+
+
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "length_holes_v1": {
+            "index": 1,
+            "min_value": 1,
+            "max_value": 35
+        }
+    }
+}
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "inserts_v1": null
+    }
+}
+
+{
+    "version": "1.0.0",
+    "identifiers": {
+        "insert": "square"
+    }
+}
+
+{
+    "version": "1.0.0",
+    "identifiers": {
+        "insert": "round"
+    }
+}
+
+{
+    "uuid": "5cdd9bd0-3920-4fbb-9576-81f5ffde6b46",
+    "version": "1.0.0",
+    "identifiers": {
+        "insert": "round"
+    }
+}
+
+
+
+
+
+
+
+   
+    
+    
