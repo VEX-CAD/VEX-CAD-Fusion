@@ -79,15 +79,19 @@ max((length_distance / 0.5 in ) - 0.1; 1)
 }
 
 {
-    "uuid": "5cdd9bd0-3920-4fbb-9576-81f5ffde6b46",
     "version": "1.0.0",
-    "identifiers": {
-        "insert": "round"
+    "parameters": {
+        "size_inch_list_v1": {
+            "index": 2,
+            "expressions": [
+                "0.125 in",
+                "0.25 in",
+                "0.375 in",
+                "0.5 in"
+            ]
+        }
     }
 }
-
-
-
 
 
 

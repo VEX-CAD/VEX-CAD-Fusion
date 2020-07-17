@@ -25,18 +25,18 @@ try:
     from .commands.SimpleJoint import SimpleJoint
     from .commands.SetAttributes import SetAttributes
     from .commands.ViewAttributes import ViewAttributes
-    from .commands.PointsToJointOrigins import PointsToJointOrigins
     from .commands.ShowJointOriginsByBoundingBox import ShowJointOriginsByBoundingBox
+    from .commands.PointsToJointOrigins import PointsToJointOrigins
 
     app = adsk.core.Application.cast(adsk.core.Application.get())
     ui = app.userInterface
 
     # Create addin definition object
     # global addin
-    addin = apper.FusionApp(config.app_name, config.company_name, False)
+    addin = apper.FusionApp('VEX CAD Library', 'VEX CAD', False)
 
     addin.add_command(
-        'Modify Part',
+        'Modify Part', 
         ModifyPart,
         {
             'cmd_description': 'Modify parametric parts from the VEX CAD Library.\n\nSelect part component and change parameters.',

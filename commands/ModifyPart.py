@@ -26,6 +26,9 @@ def defineParameterManagers():
             self.ratio = ratio
         def value(self, input):
             return unitsMgr.evaluateExpression(input + self.ratio, '')
+    
+    inToHoles = ConvertCustomUnits('/0.5in')
+    holesToIn = ConvertCustomUnits('*0.5in')
 
     def setInsertLightBulb(comp, insertType, isOn):
         for i in range(comp.occurrences.count):
@@ -45,8 +48,6 @@ def defineParameterManagers():
                     if insertType in identifiers['insert']:
                         return subComp.isBodiesFolderLightBulbOn
 
-    inToHoles = ConvertCustomUnits('/0.5in')
-    holesToIn = ConvertCustomUnits('*0.5in')
 
     class ParameterManager:
         def __init__(self, id, name):
@@ -90,32 +91,20 @@ def defineParameterManagers():
     class ButtonRowInsertsV1(ParameterManager):
         def create(self, commandInputs):
             self.commandInput = commandInputs.addButtonRowCommandInput(self.id, self.name, False)
-            # self.commandInput.listItems.add('None', True, 'commands/resources/command_icons/insert_none')
-            # self.commandInput.listItems.add('Square', False, 'commands/resources/command_icons/insert_square')
-            # self.commandInput.listItems.add('Round', False, 'commands/resources/command_icons/insert_round')
         
         def show(self, comp):
             self.commandInput.listItems.clear()
-            if iSInsertVisible(comp, 'round') and not iSInsertVisible(comp, 'square'):
-                self.commandInput.listItems.add('None', False, 'commands/resources/command_icons/insert_none')
-                self.commandInput.listItems.add('Square', False, 'commands/resources/command_icons/insert_square')
-                self.commandInput.listItems.add('Round', True, 'commands/resources/command_icons/insert_round')
-            elif iSInsertVisible(comp, 'square') and not iSInsertVisible(comp, 'round'):
-                self.commandInput.listItems.add('None', False, 'commands/resources/command_icons/insert_none')
-                self.commandInput.listItems.add('Square', True, 'commands/resources/command_icons/insert_square')
-                self.commandInput.listItems.add('Round', False, 'commands/resources/command_icons/insert_round')
-            else:
-                self.commandInput.listItems.add('None', True, 'commands/resources/command_icons/insert_none')
-                self.commandInput.listItems.add('Square', False, 'commands/resources/command_icons/insert_square')
-                self.commandInput.listItems.add('Round', False, 'commands/resources/command_icons/insert_round')
+            isSquareSelected = iSInsertVisible(comp, 'square')
+            isRoundSelected = iSInsertVisible(comp, 'round')
+            self.commandInput.listItems.add('None', not isRoundSelected and not isSquareSelected, 'commands/resources/command_icons/insert_none')
+            self.commandInput.listItems.add('Square', isSquareSelected, 'commands/resources/command_icons/insert_square')
+            self.commandInput.listItems.add('Round', isRoundSelected, 'commands/resources/command_icons/insert_round')
             self.commandInput.isVisible = True
 
-        # def previewUpdatePart(self, comp):
-        #     self.updatePart(comp)
+        def previewUpdatePart(self, comp):
+            self.updatePart(comp)
 
         def updatePart(self, comp):
-            # parameter = vex_cad.getPartData(comp)['parameters'][self.id]
-            # comp.modelParameters.item(parameter['index']).value = holesToIn.value(self.commandInput.expression)
             itemName = self.commandInput.selectedItem.name
             if itemName == 'None':
                 setInsertLightBulb(comp, 'square', False)
@@ -127,7 +116,64 @@ def defineParameterManagers():
                 setInsertLightBulb(comp, 'square', False)
                 setInsertLightBulb(comp, 'round', True)
     
+    class DropDownDistanceInchV1(ParameterManager):
+        def create(self, commandInputs):
+            self.commandInput = commandInputs.addDropDownCommandInput(self.id, self.name, 1)
+            self.custom = commandInputs.addDistanceValueCommandInput(self.id + '_custom', 'Custom ' + self.name, adsk.core.ValueInput.createByString("1 in"))
+        
+        def hide(self):
+            self.commandInput.isVisible = False
+            self.custom.isVisible = False
+        
+        def show(self, comp):
+            ao = apper.AppObjects()
+            self.commandInput.listItems.clear()
+            self.commandInput.listItems.add('Custom', True)
+            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
+            for item in parameter["expressions"]:
+                # ao.ui.messageBox('item: ' + str(unitsMgr.evaluateExpression(item, 'inch')))
+                # ao.ui.messageBox('parameter: ' + str(comp.modelParameters.item(parameter['index']).value))
+                isSelected = comp.modelParameters.item(parameter['index']).value == unitsMgr.evaluateExpression(item, 'inch')
+                # ao.ui.messageBox(str(isSelected))
+                self.commandInput.listItems.add(item, isSelected)
+            self.commandInput.isVisible = True
+
+            self.custom.minimumValue = 0
+            self.custom.isMinimumValueInclusive = False
+            self.custom.setManipulator(comp.originConstructionPoint.geometry, comp.xConstructionAxis.geometry.direction)
+            self.onUpdate(comp)
+            self.custom.isVisible = True
+            
+        def onUpdate(self, comp):
+            if self.commandInput.selectedItem.name == 'Custom':
+                self.custom.isEnabled = True
+            else:
+                ao = apper.AppObjects()
+                unitsMgr = ao.units_manager
+                expression = self.commandInput.selectedItem.name
+                if unitsMgr.isValidExpression(expression, 'in'):
+                    self.custom.expression = self.commandInput.selectedItem.name
+                self.custom.isEnabled = False
+
+        def previewUpdatePart(self, comp):
+            self.updatePart(comp)
+
+        def updatePart(self, comp):
+            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
+            ao = apper.AppObjects()
+            unitsMgr = ao.units_manager
+            expression = self.commandInput.selectedItem.name
+            # value = unitsMgr.evaluateExpression("0.125 in", 'inch')
+            # ao.ui.messageBox(itemName)
+            # ao.ui.messageBox(str(parameter['index']))
+            if self.commandInput.selectedItem.name == 'Custom':
+                expression = self.custom.expression
+
+            if unitsMgr.isValidExpression(expression, 'in'):
+                comp.modelParameters.item(parameter['index']).expression = expression
+    
     return [
+        DropDownDistanceInchV1('size_inch_list_v1', 'Size'),
         ButtonRowInsertsV1('inserts_v1', 'Inserts'),
         FloatSpinnerDistanceHolesV1('length_holes_v1', 'Length Holes'),
         FloatSpinnerDistanceHolesV1('width_holes_v1', 'Width Holes')]
@@ -184,13 +230,12 @@ class ModifyPart(apper.Fusion360CommandBase):
     # Commands in here will be run through the Fusion processor and changes will be reflected in  Fusion graphics area
     def on_preview(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
 
-        # selectionInput = inputs.itemById('selection_input_id')
-        # selectedEntity = selectionInput.selection(0).entity
-        # if selectedEntity.objectType == 'adsk::fusion::Occurrence' and selectedEntity.isReferencedComponent:
-        #     selectedEntity.breakLink()
-        # comp = vex_cad.getCompIfOccurrence(selectedEntity)
-        # previewUpdatePart(comp)
-        pass
+        selectionInput = inputs.itemById('selection_input_id')
+        selectedEntity = selectionInput.selection(0).entity
+        if selectedEntity.objectType == 'adsk::fusion::Occurrence' and selectedEntity.isReferencedComponent:
+            return
+        comp = vex_cad.getCompIfOccurrence(selectedEntity)
+        previewUpdatePart(comp)
 
     # Run after the command is finished.
     # Can be used to launch another command automatically or do other clean up.
@@ -204,15 +249,16 @@ class ModifyPart(apper.Fusion360CommandBase):
         app = adsk.core.Application.get()
 
         selectionInput = inputs.itemById('selection_input_id')
-
-        selectionInput = inputs.itemById('selection_input_id')
         if selectionInput.selectionCount > 0:
             selectedEntity = selectionInput.selection(0).entity
             selectedComp = vex_cad.getCompIfOccurrence(selectedEntity)
+            # Check if the part is parametric, if not check it's parent occurrence
             for i in range(2):
                 if selectedComp.attributes.itemByName('vex_cad', 'part_data') and 'parameters' in vex_cad.getPartData(selectedComp):
                     if changed_input.id == 'selection_input_id':
+                        # This is needed if the user selects a differant part without deselecting first
                         hideAllCommandInputs()
+                        # Show the the controls for the parameters the part has
                         showSomeCommandInputs(selectedComp)
                         if selectionInput.selectionCount == 0:
                             selectionInput.addSelection(selectedEntity)
@@ -220,10 +266,13 @@ class ModifyPart(apper.Fusion360CommandBase):
                         updateInputs(selectedComp)
                 else:
                     selectionInput.clearSelection()
+                    # If the selected part is an occurrence and has a parent occurrence
                     if selectedEntity.objectType == 'adsk::fusion::Occurrence' and '+' in selectedEntity.fullPathName:
+                        # Get the sellected part's parent Occurrence
                         selectedEntity = selectedEntity.assemblyContext
                         selectedComp = selectedEntity.component
         else:
+            # Hide the commands for the parameters from the last selected part
             hideAllCommandInputs()
 
     # Run when the user presses OK
@@ -259,14 +308,12 @@ class ModifyPart(apper.Fusion360CommandBase):
         global importingPart
         global importedPart
         if importingPart:
-            if importedPart.component.attributes.itemByName('vex_cad', 'part_data'):
-                importedCompAttributes = vex_cad.getPartData(importedPart.component)
-                if 'parameters' in importedCompAttributes:
-                    selectionInput.addSelection(importedPart)
-                    showSomeCommandInputs(importedPart.component)
+            # if importedPart.attributes.itemByName('vex_cad', 'part_data'):
+            # importedCompAttributes = vex_cad.getPartData(importedPart)
+            # if 'parameters' in importedCompAttributes:
+            selectionInput.addSelection(importedPart)
+            showSomeCommandInputs(importedPart.component)
             importingPart = False
-
-
 
 importingPart = False
 importedPart = None
@@ -278,15 +325,14 @@ class ModifyPartExternalCommandStarted(apper.Fusion360CommandEvent):
         if command_id == 'FusionImportCommand':
             importingPart = True
         if command_id == 'FusionMoveCommand':
-            # global importingPart
             if importingPart:
                 ao = apper.AppObjects()
                 tempPart = ao.ui.activeSelections.item(0).entity
-                if tempPart.component.attributes.itemByName('vex_cad', 'part_data'):
+                if tempPart.component.attributes.itemByName('vex_cad', 'part_data') and 'parameters' in vex_cad.getPartData(tempPart.component):
                     global importedPart
                     importedPart = tempPart
-                    return
-                importingPart = False
+                else:
+                    importingPart = False
 
 class ModifyPartExternalCommandEnded(apper.Fusion360CommandEvent):
 
