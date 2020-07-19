@@ -2,14 +2,14 @@
     "version": "1.0.0",
     "parameters": {
         "length_holes_v1": {
-            "index": 1,
+            "index": 0,
             "min_value": 1,
-            "max_value": 35
+            "max_value": 25
         },
         "width_holes_v1": {
-            "index": 2,
+            "index": 1,
             "min_value": 1,
-            "max_value": 3
+            "max_value": 5
         }
     }
 }
@@ -28,7 +28,9 @@
 
 profile planes:
 length_start
+width_start
 length_distance
+width_distance
 
 sketches:
 center_outside
@@ -41,8 +43,12 @@ right_inside
 parameters:
 length_holes
 max((length_distance / 0.5 in) + 0.4; 1)
+width_holes
+max((width_distance / 0.5 in) + 0.4; 1)
 length_holes_center
 max((length_distance / 0.5 in ) - 0.1; 1)
+width_holes_center
+max((width_distance / 0.5 in ) - 0.1; 1)
 
 
 {
@@ -73,11 +79,39 @@ max((length_distance / 0.5 in ) - 0.1; 1)
             "index": 2,
             "min_value": 0,
             "max_value": 5.08,
+            "min_value_inclusive": true,
+            "max_value_inclusive": true,
             "expressions": [
                 "0.125 in",
-                "0.25 in",
+                "0.250 in",
                 "0.375 in",
-                "0.5 in"
+                "0.500 in"
+            ]
+        }
+    }
+}
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "size_inch_list_v1": {
+            "index": 1,
+            "min_value": 0.254,
+            "max_value": 5.08,
+            "min_value_inclusive": true,
+            "max_value_inclusive": true,
+            "expressions": [
+                "0.250 in",
+                "0.375 in",
+                "0.500 in",
+                "0.625 in",
+                "0.750 in",
+                "0.875 in",
+                "1.000 in",
+                "1.250 in",
+                "1.500 in",
+                "1.750 in",
+                "2.000 in"
             ]
         }
     }

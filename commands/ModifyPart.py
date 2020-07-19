@@ -56,35 +56,38 @@ def defineParameterManagers():
         # Defaults
         def hide(self):
             self.commandInput.isVisible = False
-        def onUpdate(self, comp):
+        def onUpdate(self, occ):
             pass
-        def previewUpdatePart(self, comp):
+        def previewUpdatePart(self, occ):
             pass
 
         # Need to be redefined
         def create(self, commandInputs):
             pass
-        def show(self, comp):
+        def show(self, occ):
             pass
-        def updatePart(self, comp):
+        def onUpdate(self, occ, changedInput):
             pass
     
     class FloatSpinnerDistanceHolesV1(ParameterManager):
         def create(self, commandInputs):
             self.commandInput = commandInputs.addFloatSpinnerCommandInput(self.id, self.name, '', 1, 35, 1, 1)
-        def show(self, comp):
+        def show(self, occ):
+            comp = occ.component
             parameter = vex_cad.getPartData(comp)['parameters'][self.id]
             index = parameter['index']
             self.commandInput.expression = str(inToHoles.value(comp.modelParameters.item(index).expression))
             
             self.commandInput.isVisible = True
-            self.onUpdate(comp)
-        def onUpdate(self, comp):
+            self.onUpdate(occ)
+        def onUpdate(self, occ, changedInput):
+            comp = occ.component
             parameter = vex_cad.getPartData(comp)['parameters'][self.id]
             if self.commandInput.value > parameter['max_value']:
                 self.commandInput.value = parameter['max_value']
 
-        def updatePart(self, comp):
+        def updatePart(self, occ):
+            comp = occ.component
             parameter = vex_cad.getPartData(comp)['parameters'][self.id]
             comp.modelParameters.item(parameter['index']).value = holesToIn.value(self.commandInput.expression)
     
@@ -92,7 +95,8 @@ def defineParameterManagers():
         def create(self, commandInputs):
             self.commandInput = commandInputs.addButtonRowCommandInput(self.id, self.name, False)
         
-        def show(self, comp):
+        def show(self, occ):
+            comp = occ.component
             self.commandInput.listItems.clear()
             isSquareSelected = iSInsertVisible(comp, 'square')
             isRoundSelected = iSInsertVisible(comp, 'round')
@@ -101,10 +105,12 @@ def defineParameterManagers():
             self.commandInput.listItems.add('Round', isRoundSelected, 'commands/resources/command_icons/insert_round')
             self.commandInput.isVisible = True
 
-        def previewUpdatePart(self, comp):
-            self.updatePart(comp)
+        def previewUpdatePart(self, occ):
+            comp = occ.component
+            self.updatePart(occ)
 
-        def updatePart(self, comp):
+        def updatePart(self, occ):
+            comp = occ.component
             itemName = self.commandInput.selectedItem.name
             if itemName == 'None':
                 setInsertLightBulb(comp, 'square', False)
@@ -125,7 +131,8 @@ def defineParameterManagers():
             self.dropDownInput.isVisible = False
             self.distanceInput.isVisible = False
         
-        def show(self, comp):
+        def show(self, occ):
+            comp = occ.component
             ao = apper.AppObjects()
             self.dropDownInput.listItems.clear()
             self.dropDownInput.listItems.add('Custom', True)
@@ -137,42 +144,54 @@ def defineParameterManagers():
                 # ao.ui.messageBox(str(isSelected))
                 self.dropDownInput.listItems.add(item, isSelected)
             self.dropDownInput.isVisible = True
-
+            
+            self.distanceInput.expression = comp.modelParameters.item(parameter['index']).expression
             self.distanceInput.minimumValue = parameter['min_value']
             self.distanceInput.maximumValue = parameter['max_value']
-            self.distanceInput.isMinimumValueInclusive = False
-            self.distanceInput.isMaximumValueInclusive = True
-            self.distanceInput.setManipulator(comp.originConstructionPoint.geometry, comp.xConstructionAxis.geometry.direction)
-            self.onUpdate(comp)
+            self.distanceInput.isMinimumValueInclusive = parameter['min_value_inclusive']
+            self.distanceInput.isMaximumValueInclusive = parameter['max_value_inclusive']
+
+            # occMatrix3D = occ.transform.copy()
+            # occPoint3D = occMatrix3D.translation.asPoint()
+            # occVector3D = occMatrix3D.translation
+            # occVector3D.scaleBy(-1)
+            occMatrix3D = occ.transform.getAsCoordinateSystem()
+            occPoint3D = occMatrix3D[0]
+            occVector3D = occMatrix3D[1]
+            self.distanceInput.setManipulator(occPoint3D, occVector3D)
+            # self.onUpdate(occ)
             self.distanceInput.isVisible = True
             
-        def onUpdate(self, comp):
-            if self.dropDownInput.selectedItem.name == 'Custom':
-                self.distanceInput.isEnabled = True
-            else:
+        def onUpdate(self, occ, changedInput):
+            # ao = apper.AppObjects()
+            # ao.ui.messageBox('in onUpdate: ' + str(occ))
+            comp = occ.component
+            selectedName = self.dropDownInput.selectedItem.name
+            if  changedInput == self.distanceInput:
                 ao = apper.AppObjects()
                 unitsMgr = ao.units_manager
-                expression = self.dropDownInput.selectedItem.name
-                if unitsMgr.isValidExpression(expression, 'in'):
-                    self.distanceInput.expression = self.dropDownInput.selectedItem.name
-                self.distanceInput.isEnabled = False
+                self.dropDownInput.listItems.item(0).isSelected = True
+            elif  selectedName != 'Custom':
+                self.distanceInput.expression = selectedName
 
-        def previewUpdatePart(self, comp):
-            self.updatePart(comp)
+        def previewUpdatePart(self, occ):
+            comp = occ.component
+            self.updatePart(occ)
 
-        def updatePart(self, comp):
+        def updatePart(self, occ):
+            comp = occ.component
             parameter = vex_cad.getPartData(comp)['parameters'][self.id]
             ao = apper.AppObjects()
             unitsMgr = ao.units_manager
-            expression = self.dropDownInput.selectedItem.name
+            # expression = self.dropDownInput.selectedItem.name
             # value = unitsMgr.evaluateExpression("0.125 in", 'inch')
             # ao.ui.messageBox(itemName)
             # ao.ui.messageBox(str(parameter['index']))
-            if self.dropDownInput.selectedItem.name == 'Custom':
-                expression = self.distanceInput.expression
+            # if self.dropDownInput.selectedItem.name == 'Custom':
+            #     expression = self.distanceInput.expression
 
-            if unitsMgr.isValidExpression(expression, 'in'):
-                comp.modelParameters.item(parameter['index']).expression = expression
+            if unitsMgr.isValidExpression(self.distanceInput.expression, 'in'):
+                comp.modelParameters.item(parameter['index']).value = self.distanceInput.value
     
     return [
         DropDownDistanceInchV1('size_inch_list_v1', 'Size'),
@@ -195,22 +214,24 @@ def parameterManagersInParameters(comp):
     parameters = vex_cad.getPartData(comp)['parameters']
     return [allParameterManagers[parameter] for parameter in parameters if parameter in allParameterManagers]
 
-def showSomeCommandInputs(comp):
-    for parameterManager in parameterManagersInParameters(comp):
-        parameterManager.show(comp)
+def showSomeCommandInputs(occ):
+    for parameterManager in parameterManagersInParameters(occ.component):
+        parameterManager.show(occ)
     keyboard.press_and_release('tab')
 
-def updateInputs(comp):
-    for parameterManager in parameterManagersInParameters(comp):
-        parameterManager.onUpdate(comp)
+def updateInputs(occ, changedInput):
+    # ao = apper.AppObjects()
+    for parameterManager in parameterManagersInParameters(occ.component):
+        # ao.ui.messageBox('in updateInputs: ' + str(occ))
+        parameterManager.onUpdate(occ, changedInput)
 
-def updatePart(comp):
-    for parameterManager in parameterManagersInParameters(comp):
-        parameterManager.updatePart(comp)
+def updatePart(occ):
+    for parameterManager in parameterManagersInParameters(occ.component):
+        parameterManager.updatePart(occ)
 
-def previewUpdatePart(comp):
-    for parameterManager in parameterManagersInParameters(comp):
-        parameterManager.previewUpdatePart(comp)
+def previewUpdatePart(occ):
+    for parameterManager in parameterManagersInParameters(occ.component):
+        parameterManager.previewUpdatePart(occ)
 
 
 
@@ -233,11 +254,10 @@ class ModifyPart(apper.Fusion360CommandBase):
     def on_preview(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
 
         selectionInput = inputs.itemById('selection_input_id')
-        selectedEntity = selectionInput.selection(0).entity
-        if selectedEntity.objectType == 'adsk::fusion::Occurrence' and selectedEntity.isReferencedComponent:
+        selectedOcc = selectionInput.selection(0).entity
+        if selectedOcc.isReferencedComponent:
             return
-        comp = vex_cad.getCompIfOccurrence(selectedEntity)
-        previewUpdatePart(comp)
+        previewUpdatePart(selectedOcc)
 
     # Run after the command is finished.
     # Can be used to launch another command automatically or do other clean up.
@@ -252,8 +272,12 @@ class ModifyPart(apper.Fusion360CommandBase):
 
         selectionInput = inputs.itemById('selection_input_id')
         if selectionInput.selectionCount > 0:
-            selectedEntity = selectionInput.selection(0).entity
-            selectedComp = vex_cad.getCompIfOccurrence(selectedEntity)
+            selectedOcc = selectionInput.selection(0).entity
+            # Prevent the root component from being selected
+            if selectedOcc.objectType != 'adsk::fusion::Occurrence':
+                selectionInput.clearSelection()
+                return
+            selectedComp = selectedOcc.component
             # Check if the part is parametric, if not check it's parent occurrence
             for i in range(2):
                 if selectedComp.attributes.itemByName('vex_cad', 'part_data') and 'parameters' in vex_cad.getPartData(selectedComp):
@@ -261,18 +285,19 @@ class ModifyPart(apper.Fusion360CommandBase):
                         # This is needed if the user selects a differant part without deselecting first
                         hideAllCommandInputs()
                         # Show the the controls for the parameters the part has
-                        showSomeCommandInputs(selectedComp)
+                        showSomeCommandInputs(selectedOcc)
                         if selectionInput.selectionCount == 0:
-                            selectionInput.addSelection(selectedEntity)
+                            selectionInput.addSelection(selectedOcc)
                     else:
-                        updateInputs(selectedComp)
+                        # ao.ui.messageBox('before updateInputs: ' + str(selectedOcc))
+                        updateInputs(selectedOcc, changed_input)
                 else:
                     selectionInput.clearSelection()
                     # If the selected part is an occurrence and has a parent occurrence
-                    if selectedEntity.objectType == 'adsk::fusion::Occurrence' and '+' in selectedEntity.fullPathName:
+                    if '+' in selectedOcc.fullPathName:
                         # Get the sellected part's parent Occurrence
-                        selectedEntity = selectedEntity.assemblyContext
-                        selectedComp = selectedEntity.component
+                        selectedOcc = selectedOcc.assemblyContext
+                        selectedComp = selectedOcc.component
         else:
             # Hide the commands for the parameters from the last selected part
             hideAllCommandInputs()
@@ -281,11 +306,10 @@ class ModifyPart(apper.Fusion360CommandBase):
     # This is typically where your main program logic would go
     def on_execute(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs, args, input_values):
         selectionInput = inputs.itemById('selection_input_id')
-        selectedEntity = selectionInput.selection(0).entity
-        if selectedEntity.objectType == 'adsk::fusion::Occurrence' and selectedEntity.isReferencedComponent:
-            selectedEntity.breakLink()
-        comp = vex_cad.getCompIfOccurrence(selectedEntity)
-        updatePart(comp)
+        selectedOcc = selectionInput.selection(0).entity
+        if selectedOcc.isReferencedComponent:
+            selectedOcc.breakLink()
+        updatePart(selectedOcc)
 
     # Run when the user selects your command icon from the Fusion 360 UI
     # Typically used to create and display a command dialog box
@@ -314,7 +338,7 @@ class ModifyPart(apper.Fusion360CommandBase):
             # importedCompAttributes = vex_cad.getPartData(importedPart)
             # if 'parameters' in importedCompAttributes:
             selectionInput.addSelection(importedPart)
-            showSomeCommandInputs(importedPart.component)
+            showSomeCommandInputs(importedPart)
             importingPart = False
 
 importingPart = False
