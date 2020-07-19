@@ -118,42 +118,44 @@ def defineParameterManagers():
     
     class DropDownDistanceInchV1(ParameterManager):
         def create(self, commandInputs):
-            self.commandInput = commandInputs.addDropDownCommandInput(self.id, self.name, 1)
-            self.custom = commandInputs.addDistanceValueCommandInput(self.id + '_custom', 'Custom ' + self.name, adsk.core.ValueInput.createByString("1 in"))
+            self.dropDownInput = commandInputs.addDropDownCommandInput(self.id + '_options', 'Options', 1)
+            self.distanceInput = commandInputs.addDistanceValueCommandInput(self.id, self.name, adsk.core.ValueInput.createByString("1 in"))
         
         def hide(self):
-            self.commandInput.isVisible = False
-            self.custom.isVisible = False
+            self.dropDownInput.isVisible = False
+            self.distanceInput.isVisible = False
         
         def show(self, comp):
             ao = apper.AppObjects()
-            self.commandInput.listItems.clear()
-            self.commandInput.listItems.add('Custom', True)
+            self.dropDownInput.listItems.clear()
+            self.dropDownInput.listItems.add('Custom', True)
             parameter = vex_cad.getPartData(comp)['parameters'][self.id]
             for item in parameter["expressions"]:
                 # ao.ui.messageBox('item: ' + str(unitsMgr.evaluateExpression(item, 'inch')))
                 # ao.ui.messageBox('parameter: ' + str(comp.modelParameters.item(parameter['index']).value))
                 isSelected = comp.modelParameters.item(parameter['index']).value == unitsMgr.evaluateExpression(item, 'inch')
                 # ao.ui.messageBox(str(isSelected))
-                self.commandInput.listItems.add(item, isSelected)
-            self.commandInput.isVisible = True
+                self.dropDownInput.listItems.add(item, isSelected)
+            self.dropDownInput.isVisible = True
 
-            self.custom.minimumValue = 0
-            self.custom.isMinimumValueInclusive = False
-            self.custom.setManipulator(comp.originConstructionPoint.geometry, comp.xConstructionAxis.geometry.direction)
+            self.distanceInput.minimumValue = parameter['min_value']
+            self.distanceInput.maximumValue = parameter['max_value']
+            self.distanceInput.isMinimumValueInclusive = False
+            self.distanceInput.isMaximumValueInclusive = True
+            self.distanceInput.setManipulator(comp.originConstructionPoint.geometry, comp.xConstructionAxis.geometry.direction)
             self.onUpdate(comp)
-            self.custom.isVisible = True
+            self.distanceInput.isVisible = True
             
         def onUpdate(self, comp):
-            if self.commandInput.selectedItem.name == 'Custom':
-                self.custom.isEnabled = True
+            if self.dropDownInput.selectedItem.name == 'Custom':
+                self.distanceInput.isEnabled = True
             else:
                 ao = apper.AppObjects()
                 unitsMgr = ao.units_manager
-                expression = self.commandInput.selectedItem.name
+                expression = self.dropDownInput.selectedItem.name
                 if unitsMgr.isValidExpression(expression, 'in'):
-                    self.custom.expression = self.commandInput.selectedItem.name
-                self.custom.isEnabled = False
+                    self.distanceInput.expression = self.dropDownInput.selectedItem.name
+                self.distanceInput.isEnabled = False
 
         def previewUpdatePart(self, comp):
             self.updatePart(comp)
@@ -162,12 +164,12 @@ def defineParameterManagers():
             parameter = vex_cad.getPartData(comp)['parameters'][self.id]
             ao = apper.AppObjects()
             unitsMgr = ao.units_manager
-            expression = self.commandInput.selectedItem.name
+            expression = self.dropDownInput.selectedItem.name
             # value = unitsMgr.evaluateExpression("0.125 in", 'inch')
             # ao.ui.messageBox(itemName)
             # ao.ui.messageBox(str(parameter['index']))
-            if self.commandInput.selectedItem.name == 'Custom':
-                expression = self.custom.expression
+            if self.dropDownInput.selectedItem.name == 'Custom':
+                expression = self.distanceInput.expression
 
             if unitsMgr.isValidExpression(expression, 'in'):
                 comp.modelParameters.item(parameter['index']).expression = expression

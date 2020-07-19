@@ -38,10 +38,21 @@ class SetAttributes(apper.Fusion360CommandBase):
         # Get a reference to all relevant application objects in a dictionary
         ao = AppObjects()
 
-        selectionInput = input_values['selection_input_id']
+        # selectionInput = input_values['selection_input_id']
         inputString = input_values['textBox']
+        selectionInput = inputs.itemById('selection_input_id')
+        
+        if inputString == '':
+            if selectionInput.selection(0).entity.objectType == 'adsk::fusion::Occurrence':
+                entity = selectionInput.selection(0).entity.component
+            else: 
+                entity = selectionInput.selection(0).entity
+            if entity.attributes.itemByName("vex_cad", "part_data") is not None:
+                inputString = entity.attributes.itemByName("vex_cad", "part_data").value
 
-        attributesDict = {"uuid": str(uuid.uuid4())}
+
+
+        attributesDict = {"uuid": ''}
         try:
             attributesDict.update(json.loads(inputString))
         except:
@@ -50,15 +61,15 @@ class SetAttributes(apper.Fusion360CommandBase):
                             adsk.core.MessageBoxIconTypes.CriticalIconType)
             return
         
+        attributesDict["uuid"] = str(uuid.uuid4())
+
         attributesJson = json.dumps(attributesDict)
-        selectionInput = inputs.itemById('selection_input_id')
-        if selectionInput.selectionCount > 0:
-            entity = vex_cad.getCompIfOccurrence(selectionInput.selection(0).entity)
-            for index in range(entity.attributes.count):
-                entity.attributes.item(index).deleteMe
-            entity.attributes.add("vex_cad", "part_data", attributesJson)
-            appliedAttributes = entity.attributes.itemByName("vex_cad", "part_data").value
-            ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
+        entity = vex_cad.getCompIfOccurrence(selectionInput.selection(0).entity)
+        for index in range(entity.attributes.count):
+            entity.attributes.item(index).deleteMe
+        entity.attributes.add("vex_cad", "part_data", attributesJson)
+        appliedAttributes = entity.attributes.itemByName("vex_cad", "part_data").value
+        ao.ui.messageBox(appliedAttributes + '\n\nWas applied successfully.')
 
 
     # Run when the user selects your command icon from the Fusion 360 UI
