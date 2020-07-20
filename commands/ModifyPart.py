@@ -79,7 +79,7 @@ def defineParameterManagers():
             self.commandInput.expression = str(inToHoles.value(comp.modelParameters.item(index).expression))
             
             self.commandInput.isVisible = True
-            self.onUpdate(occ)
+            # self.onUpdate(occ)
         def onUpdate(self, occ, changedInput):
             comp = occ.component
             parameter = vex_cad.getPartData(comp)['parameters'][self.id]
@@ -122,14 +122,19 @@ def defineParameterManagers():
                 setInsertLightBulb(comp, 'square', False)
                 setInsertLightBulb(comp, 'round', True)
     
-    class DropDownDistanceInchV1(ParameterManager):
+    class DropDownDistanceV1(ParameterManager):
         def create(self, commandInputs):
-            self.dropDownInput = commandInputs.addDropDownCommandInput(self.id + '_options', 'Options', 1)
-            self.distanceInput = commandInputs.addDistanceValueCommandInput(self.id, self.name, adsk.core.ValueInput.createByString("1 in"))
+            self.group = commandInputs.addGroupCommandInput(self.id, self.name)
+            self.dropDownInput = self.group.children.addDropDownCommandInput(self.id + '_options', 'Options', 1)
+            self.distanceInput = self.group.children.addDistanceValueCommandInput(self.id + '_distance', 'Distance', adsk.core.ValueInput.createByReal(0))
         
+        def setVisiblity(self, isVisible):
+            self.group.isVisible = isVisible
+            for i in range(self.group.children.count):
+                self.group.children.item(i).isVisible = isVisible
+
         def hide(self):
-            self.dropDownInput.isVisible = False
-            self.distanceInput.isVisible = False
+            self.setVisiblity(False)
         
         def show(self, occ):
             comp = occ.component
@@ -140,27 +145,26 @@ def defineParameterManagers():
             for item in parameter["expressions"]:
                 # ao.ui.messageBox('item: ' + str(unitsMgr.evaluateExpression(item, 'inch')))
                 # ao.ui.messageBox('parameter: ' + str(comp.modelParameters.item(parameter['index']).value))
-                isSelected = comp.modelParameters.item(parameter['index']).value == unitsMgr.evaluateExpression(item, 'inch')
+                isSelected = comp.modelParameters.item(parameter['index']).value == unitsMgr.evaluateExpression(item, '')
                 # ao.ui.messageBox(str(isSelected))
                 self.dropDownInput.listItems.add(item, isSelected)
-            self.dropDownInput.isVisible = True
+            # self.dropDownInput.isVisible = True
             
             self.distanceInput.expression = comp.modelParameters.item(parameter['index']).expression
             self.distanceInput.minimumValue = parameter['min_value']
             self.distanceInput.maximumValue = parameter['max_value']
-            self.distanceInput.isMinimumValueInclusive = parameter['min_value_inclusive']
-            self.distanceInput.isMaximumValueInclusive = parameter['max_value_inclusive']
+            # self.distanceInput.isMinimumValueInclusive = parameter['min_value_inclusive']
+            # self.distanceInput.isMaximumValueInclusive = parameter['max_value_inclusive']
 
-            # occMatrix3D = occ.transform.copy()
-            # occPoint3D = occMatrix3D.translation.asPoint()
-            # occVector3D = occMatrix3D.translation
-            # occVector3D.scaleBy(-1)
-            occMatrix3D = occ.transform.getAsCoordinateSystem()
-            occPoint3D = occMatrix3D[0]
-            occVector3D = occMatrix3D[1]
+            coordSys = {'origin': 0, 'xAxis': 1, 'yAxis': 2, 'zAxis': 3}
+            occMatrix3D = occ.transform
+            occMatrix3DCoords = occMatrix3D.getAsCoordinateSystem()
+            occVector3D = occMatrix3DCoords[coordSys[parameter['manipulator_axis']]]
+            occPoint3D = occMatrix3DCoords[coordSys['origin']]
+            pointOffset = parameter['manipulator_point_offset']
             self.distanceInput.setManipulator(occPoint3D, occVector3D)
             # self.onUpdate(occ)
-            self.distanceInput.isVisible = True
+            self.setVisiblity(True)
             
         def onUpdate(self, occ, changedInput):
             # ao = apper.AppObjects()
@@ -190,11 +194,11 @@ def defineParameterManagers():
             # if self.dropDownInput.selectedItem.name == 'Custom':
             #     expression = self.distanceInput.expression
 
-            if unitsMgr.isValidExpression(self.distanceInput.expression, 'in'):
+            if unitsMgr.isValidExpression(self.distanceInput.expression, ''):
                 comp.modelParameters.item(parameter['index']).value = self.distanceInput.value
     
     return [
-        DropDownDistanceInchV1('size_inch_list_v1', 'Size'),
+        DropDownDistanceV1('distance_list_v1', 'Size'),
         ButtonRowInsertsV1('inserts_v1', 'Inserts'),
         FloatSpinnerDistanceHolesV1('length_holes_v1', 'Length Holes'),
         FloatSpinnerDistanceHolesV1('width_holes_v1', 'Width Holes')]
@@ -324,7 +328,7 @@ class ModifyPart(apper.Fusion360CommandBase):
         default_units = ao.units_manager.defaultLengthUnits
 
 
-        selectionInput = inputs.addSelectionInput('selection_input_id', 'Select Parametric Part', 'Component to select')
+        selectionInput = inputs.addSelectionInput('selection_input_id', 'Part', 'Component to select')
         selectionInput.setSelectionLimits(1, 1)
         selectionInput.addSelectionFilter('Occurrences')
 

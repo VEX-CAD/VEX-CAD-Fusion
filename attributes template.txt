@@ -4,7 +4,7 @@
         "length_holes_v1": {
             "index": 0,
             "min_value": 1,
-            "max_value": 25
+            "max_value": 35
         },
         "width_holes_v1": {
             "index": 1,
@@ -22,6 +22,21 @@
             "index": 0,
             "min_value": 1,
             "max_value": 35
+        }
+    }
+}
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "length_holes_v1": {
+            "index": 0,
+            "min_value": 0,
+            "max_value": 44.45'
+            "min_value_inclusive": false,
+            "max_value_inclusive": true,
+            "manipulator_point_offset": [0, -0.635, 0]
+            "manipulator_axis": 2
         }
     }
 }
@@ -75,12 +90,85 @@ max((width_distance / 0.5 in ) - 0.1; 1)
 {
     "version": "1.0.0",
     "parameters": {
-        "size_inch_list_v1": {
-            "index": 2,
-            "min_value": 0,
+        "distance_list_v1": {
+            "index": 0,
+            "min_value": 0.0508,
+            "max_value": 1.27,
+            "manipulator_point_offset": [
+                0,
+                0,
+                0
+            ],
+            "manipulator_axis": "xAxis",
+            "manipulator_axis_flipped": false,
+            "expressions": [
+                "0.0625 in",
+                "0.125 in",
+                "0.25 in",
+                "0.50 in"
+            ]
+        }
+    }
+}
+
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_list_v1": {
+            "index": 0,
+            "min_value": 0.0508,
+            "max_value": 0.254,
+            "manipulator_point_offset": [
+                0,
+                0,
+                0
+            ],
+            "manipulator_axis": "xAxis",
+            "manipulator_axis_flipped": false,
+            "expressions": [
+                "0.03 in"
+            ]
+        }
+    }
+}
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_list_v1": {
+            "index": 0,
+            "min_value": 0.0508,
             "max_value": 5.08,
-            "min_value_inclusive": true,
-            "max_value_inclusive": true,
+            "manipulator_point_offset": [
+                0,
+                0,
+                0
+            ],
+            "manipulator_axis": "xAxis",
+            "manipulator_axis_flipped": false,
+            "expressions": [
+                "4.6 mm",
+                "8 mm"
+            ]
+        }
+    }
+}
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_list_v1": {
+            "index": 0,
+            "min_value": 0.0254,
+            "max_value": 5.08,
+            "manipulator_point_offset": [
+                0,
+                0,
+                0
+            ],
+            "manipulator_axis": "xAxis",
+            "manipulator_axis_flipped": false,
             "expressions": [
                 "0.125 in",
                 "0.250 in",
@@ -91,15 +179,21 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
+
 {
     "version": "1.0.0",
     "parameters": {
-        "size_inch_list_v1": {
-            "index": 1,
+        "distance_list_v1": {
+            "index": 0,
             "min_value": 0.254,
             "max_value": 5.08,
-            "min_value_inclusive": true,
-            "max_value_inclusive": true,
+            "manipulator_point_offset": [
+                0,
+                0,
+                0
+            ],
+            "manipulator_axis": "xAxis",
+            "manipulator_axis_flipped": false,
             "expressions": [
                 "0.250 in",
                 "0.375 in",
@@ -112,6 +206,54 @@ max((width_distance / 0.5 in ) - 0.1; 1)
                 "1.500 in",
                 "1.750 in",
                 "2.000 in"
+            ]
+        }
+    }
+}
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_list_v1": {
+            "index": 0,
+            "min_value": 0.254,
+            "max_value": 5.08,
+            "manipulator_point_offset": [
+                0,
+                0,
+                0
+            ],
+            "manipulator_axis": "xAxis",
+            "manipulator_axis_flipped": false,
+            "expressions": [
+                "0.250 in",
+                "0.500 in"
+            ]
+        }
+    }
+}
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_list_v1": {
+            "index": 0,
+            "min_value": 0.254,
+            "max_value": 5.08,
+            "manipulator_point_offset": [
+                0,
+                0,
+                0
+            ],
+            "manipulator_axis": "xAxis",
+            "manipulator_axis_flipped": false,
+            "expressions": [
+                "0.250 in",
+                "0.375 in",
+                "0.500 in",
+                "0.625 in",
+                "0.750 in",
+                "1.000 in"
             ]
         }
     }
