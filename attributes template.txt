@@ -192,7 +192,7 @@ max((width_distance / 0.5 in ) - 0.1; 1)
                 0,
                 0
             ],
-            "manipulator_axis": "xAxis",
+            "manipulator_axis": "yAxis",
             "manipulator_axis_flipped": false,
             "expressions": [
                 "0.250 in",
@@ -275,6 +275,22 @@ max((width_distance / 0.5 in ) - 0.1; 1)
 
 
 
-   
-    
-    
+
+
+{
+    "version": "1.0.0",
+    "parameters": {
+        "DistanceSliderV1": {
+            "index": 0,
+            "min_value": 0,
+            "max_value": 28.23999999944,
+            "manipulator_point_offset": [
+                0,
+                0,
+                0
+            ],
+            "manipulator_axis": "xAxis",
+            "manipulator_axis_flipped": false
+        }
+    }
+}

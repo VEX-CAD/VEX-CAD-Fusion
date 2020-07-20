@@ -153,8 +153,6 @@ def defineParameterManagers():
             self.distanceInput.expression = comp.modelParameters.item(parameter['index']).expression
             self.distanceInput.minimumValue = parameter['min_value']
             self.distanceInput.maximumValue = parameter['max_value']
-            # self.distanceInput.isMinimumValueInclusive = parameter['min_value_inclusive']
-            # self.distanceInput.isMaximumValueInclusive = parameter['max_value_inclusive']
 
             coordSys = {'origin': 0, 'xAxis': 1, 'yAxis': 2, 'zAxis': 3}
             occMatrix3D = occ.transform
@@ -163,12 +161,9 @@ def defineParameterManagers():
             occPoint3D = occMatrix3DCoords[coordSys['origin']]
             pointOffset = parameter['manipulator_point_offset']
             self.distanceInput.setManipulator(occPoint3D, occVector3D)
-            # self.onUpdate(occ)
             self.setVisiblity(True)
             
         def onUpdate(self, occ, changedInput):
-            # ao = apper.AppObjects()
-            # ao.ui.messageBox('in onUpdate: ' + str(occ))
             comp = occ.component
             selectedName = self.dropDownInput.selectedItem.name
             if  changedInput == self.distanceInput:
@@ -187,17 +182,54 @@ def defineParameterManagers():
             parameter = vex_cad.getPartData(comp)['parameters'][self.id]
             ao = apper.AppObjects()
             unitsMgr = ao.units_manager
-            # expression = self.dropDownInput.selectedItem.name
-            # value = unitsMgr.evaluateExpression("0.125 in", 'inch')
-            # ao.ui.messageBox(itemName)
-            # ao.ui.messageBox(str(parameter['index']))
-            # if self.dropDownInput.selectedItem.name == 'Custom':
-            #     expression = self.distanceInput.expression
+            if unitsMgr.isValidExpression(self.distanceInput.expression, ''):
+                comp.modelParameters.item(parameter['index']).value = self.distanceInput.value
+    
+    class DistanceSliderV1(ParameterManager):
+        def create(self, commandInputs):
+            self.group = commandInputs.addGroupCommandInput(self.id, self.name)
+            self.distanceInput = self.group.children.addDistanceValueCommandInput(self.id + '_distance', 'Distance', adsk.core.ValueInput.createByReal(0))
+        
+        def setVisiblity(self, isVisible):
+            self.group.isVisible = isVisible
+            for i in range(self.group.children.count):
+                self.group.children.item(i).isVisible = isVisible
 
+        def hide(self):
+            self.setVisiblity(False)
+        
+        def show(self, occ):
+            comp = occ.component
+            ao = apper.AppObjects()
+            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
+            
+            self.distanceInput.expression = comp.modelParameters.item(parameter['index']).expression
+            self.distanceInput.minimumValue = parameter['min_value']
+            self.distanceInput.maximumValue = parameter['max_value']
+
+            coordSys = {'origin': 0, 'xAxis': 1, 'yAxis': 2, 'zAxis': 3}
+            occMatrix3D = occ.transform
+            occMatrix3DCoords = occMatrix3D.getAsCoordinateSystem()
+            occVector3D = occMatrix3DCoords[coordSys[parameter['manipulator_axis']]]
+            occPoint3D = occMatrix3DCoords[coordSys['origin']]
+            pointOffset = parameter['manipulator_point_offset']
+            self.distanceInput.setManipulator(occPoint3D, occVector3D)
+            self.setVisiblity(True)
+
+        def previewUpdatePart(self, occ):
+            comp = occ.component
+            self.updatePart(occ)
+
+        def updatePart(self, occ):
+            comp = occ.component
+            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
+            ao = apper.AppObjects()
+            unitsMgr = ao.units_manager
             if unitsMgr.isValidExpression(self.distanceInput.expression, ''):
                 comp.modelParameters.item(parameter['index']).value = self.distanceInput.value
     
     return [
+        DistanceSliderV1('DistanceSliderV1', 'Length'),
         DropDownDistanceV1('distance_list_v1', 'Size'),
         ButtonRowInsertsV1('inserts_v1', 'Inserts'),
         FloatSpinnerDistanceHolesV1('length_holes_v1', 'Length Holes'),
