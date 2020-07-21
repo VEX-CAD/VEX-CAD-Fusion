@@ -1,21 +1,3 @@
-{
-    "version": "1.0.0",
-    "parameters": {
-        "length_holes_v1": {
-            "index": 0,
-            "min_value": 1.27,
-            "max_value": 44.45,
-            "manipulator_axis": "yAxis",
-            "manipulator_point_offset": [
-                0.635,
-                -0.635,
-                0
-            ]
-        }
-    }
-}
-
-
 profile planes:
 length_start
 width_start
@@ -40,7 +22,7 @@ max((length_distance / 0.5 in ) - 0.1; 1)
 width_holes_center
 max((width_distance / 0.5 in ) - 0.1; 1)
 
-
+// Part with inserts
 {
     "version": "1.0.0",
     "parameters": {
@@ -48,6 +30,7 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
+// Square insert
 {
     "version": "1.0.0",
     "identifiers": {
@@ -55,6 +38,7 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
+// Round insert
 {
     "version": "1.0.0",
     "identifiers": {
@@ -62,66 +46,53 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
+// HS spacer
 {
     "version": "1.0.0",
     "parameters": {
-        "distance_list_v1": {
+        "distance_list_size_v1": {
             "index": 0,
             "min_value": 0.0508,
             "max_value": 1.27,
-            "manipulator_point_offset": [
-                0,
-                0,
-                0
-            ],
             "manipulator_axis": "xAxis",
-            "manipulator_axis_flipped": false,
             "expressions": [
                 "0.0625 in",
                 "0.125 in",
-                "0.25 in",
-                "0.50 in"
+                "0.250 in",
+                "0.500 in"
             ]
         }
     }
 }
 
-
+// Washer
 {
     "version": "1.0.0",
     "parameters": {
-        "distance_list_v1": {
+        "distance_list_size_v1": {
             "index": 0,
-            "min_value": 0.0508,
+            "min_value": 0.0254,
             "max_value": 0.254,
-            "manipulator_point_offset": [
-                0,
-                0,
-                0
-            ],
             "manipulator_axis": "xAxis",
-            "manipulator_axis_flipped": false,
             "expressions": [
-                "0.03 in"
+                "0.02 in",
+                "0.03 in",
+                "0.04 in",
+                "0.06 in"
             ]
         }
     }
 }
 
+// Metric spacer
 {
     "version": "1.0.0",
     "parameters": {
-        "distance_list_v1": {
+        "distance_list_size_v1": {
             "index": 0,
             "min_value": 0.0508,
             "max_value": 5.08,
-            "manipulator_point_offset": [
-                0,
-                0,
-                0
-            ],
             "manipulator_axis": "xAxis",
-            "manipulator_axis_flipped": false,
             "expressions": [
                 "4.6 mm",
                 "8 mm"
@@ -130,20 +101,15 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
+// Normal spacer
 {
     "version": "1.0.0",
     "parameters": {
-        "distance_list_v1": {
+        "distance_list_size_v1": {
             "index": 0,
             "min_value": 0.0254,
             "max_value": 5.08,
-            "manipulator_point_offset": [
-                0,
-                0,
-                0
-            ],
             "manipulator_axis": "xAxis",
-            "manipulator_axis_flipped": false,
             "expressions": [
                 "0.125 in",
                 "0.250 in",
@@ -154,21 +120,15 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
-
+// Normal screw
 {
     "version": "1.0.0",
     "parameters": {
-        "distance_list_v1": {
+        "distance_list_size_v1": {
             "index": 0,
             "min_value": 0.254,
             "max_value": 5.08,
-            "manipulator_point_offset": [
-                0,
-                0,
-                0
-            ],
             "manipulator_axis": "yAxis",
-            "manipulator_axis_flipped": false,
             "expressions": [
                 "0.250 in",
                 "0.375 in",
@@ -186,42 +146,15 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
+// Short screw
 {
     "version": "1.0.0",
     "parameters": {
-        "distance_list_v1": {
+        "distance_list_size_v1": {
             "index": 0,
             "min_value": 0.254,
             "max_value": 5.08,
-            "manipulator_point_offset": [
-                0,
-                0,
-                0
-            ],
             "manipulator_axis": "xAxis",
-            "manipulator_axis_flipped": false,
-            "expressions": [
-                "0.250 in",
-                "0.500 in"
-            ]
-        }
-    }
-}
-
-{
-    "version": "1.0.0",
-    "parameters": {
-        "distance_list_v1": {
-            "index": 0,
-            "min_value": 0.254,
-            "max_value": 5.08,
-            "manipulator_point_offset": [
-                0,
-                0,
-                0
-            ],
-            "manipulator_axis": "xAxis",
-            "manipulator_axis_flipped": false,
             "expressions": [
                 "0.250 in",
                 "0.375 in",
@@ -234,18 +167,43 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
+// Standoff
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_list_size_v1": {
+            "index": 0,
+            "min_value": 0.635,
+            "max_value": 15.24,
+            "manipulator_axis": "yAxis",
+            "expressions": [
+                "0.25 in",
+                "0.50 in",
+                "0.75 in",
+                "1.00 in",
+                "1.50 in",
+                "2.00 in",
+                "2.50 in",
+                "3.00 in",
+                "4.00 in",
+                "5.00 in",
+                "6.00 in"
+            ]
+        }
+    }
+}
 // Linear Rail
 {
     "version": "1.0.0",
     "parameters": {
-        "length_holes_v1": {
+        "distance_holes_length_v1": {
             "index": 0,
             "min_value": 1.27,
             "max_value": 44.45,
             "manipulator_point_offset": [
                 0,
                 -0.635,
-                0.88
+                0.44
             ],
             "manipulator_axis": "yAxis",
             "manipulator_axis_flipped": false
@@ -257,7 +215,7 @@ max((width_distance / 0.5 in ) - 0.1; 1)
 {
     "version": "1.0.0",
     "parameters": {
-        "length_holes_v1": {
+        "distance_holes_length_v1": {
             "index": 0,
             "min_value": 1.27,
             "max_value": 44.45,
@@ -275,7 +233,7 @@ max((width_distance / 0.5 in ) - 0.1; 1)
 {
     "version": "1.0.0",
     "parameters": {
-        "length_holes_v1": {
+        "distance_holes_length_v1": {
             "index": 0,
             "min_value": 1.27,
             "max_value": 31.75,
@@ -283,10 +241,10 @@ max((width_distance / 0.5 in ) - 0.1; 1)
             "manipulator_point_offset": [
                 -0.635,
                 -0.635,
-                0
+                0.08
             ]
         },
-        "width_holes_v1": {
+        "distance_holes_width_v1": {
             "index": 1,
             "min_value": 1.27,
             "max_value": 6.35,
@@ -294,7 +252,7 @@ max((width_distance / 0.5 in ) - 0.1; 1)
             "manipulator_point_offset": [
                 -0.635,
                 -0.635,
-                0
+                0.08
             ]
         }
     }
@@ -321,7 +279,7 @@ max((width_distance / 0.5 in ) - 0.1; 1)
             "index": 0,
             "min_value": 0,
             "max_value": 28.76156475521437,
-            "manipulator_axis": "xAxis",
+            "manipulator_axis": "xAxis"
         }
     }
 }
@@ -335,7 +293,7 @@ max((width_distance / 0.5 in ) - 0.1; 1)
             "index": 0,
             "min_value": 0,
             "max_value": 28.23999999944,
-            "manipulator_axis": "xAxis",
+            "manipulator_axis": "xAxis"
         }
     }
 }

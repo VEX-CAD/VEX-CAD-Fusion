@@ -73,7 +73,7 @@ def defineParameterManagers():
         def onUpdate(self, occ, changedInput):
             pass
     
-    class ButtonRowInsertsV1(ParameterManager):
+    class ButtonRowInserts(ParameterManager):
         def create(self, commandInputs):
             self.commandInput = commandInputs.addButtonRowCommandInput(self.id, self.name, False)
         
@@ -100,7 +100,7 @@ def defineParameterManagers():
                 setInsertLightBulb(comp, 'square', False)
                 setInsertLightBulb(comp, 'round', True)
     
-    class DistanceValueV1(ParameterManager):
+    class DistanceModule(ParameterManager):
         def create(self, commandInputs):
             self.commandInput = commandInputs.addDistanceValueCommandInput(self.id, self.name, adsk.core.ValueInput.createByReal(0))
         
@@ -139,11 +139,29 @@ def defineParameterManagers():
             if unitsMgr.isValidExpression(self.commandInput.expression, ''):
                 comp.modelParameters.item(parameter['index']).value = self.commandInput.value
 
-    class DistanceHolesV1(ParameterManager):
+    class DistanceGroup(ParameterManager):
+        def create(self, commandInputs):
+            self.group = commandInputs.addGroupCommandInput(self.id, self.name)
+            self.distanceValue = DistanceModule(self.id + '_distance_value', 'Distance')
+            self.distanceValue.create(self.group.children)
+            self.distanceValue.parameterId = self.id
+
+        def show(self, occ):
+            self.distanceValue.show(occ)
+            self.group.isVisible = True
+
+        def hide(self):
+            self.distanceValue.hide()
+            self.group.isVisible = False
+
+        def updatePart(self, occ):
+            self.distanceValue.updatePart(occ)
+
+    class DistanceSliderHoles(ParameterManager):
         def create(self, commandInputs):
             self.group = commandInputs.addGroupCommandInput(self.id, self.name)
             self.intSlider = self.group.children.addIntegerSliderCommandInput(self.id + '_int_slider', 'Holes', 0, 40)
-            self.distanceValue = DistanceValueV1(self.id + '_distance_slider', 'Distance')
+            self.distanceValue = DistanceModule(self.id + '_distance_value', 'Distance')
             self.distanceValue.create(self.group.children)
             self.distanceValue.parameterId = self.id
 
@@ -175,11 +193,11 @@ def defineParameterManagers():
         def updatePart(self, occ):
             self.distanceValue.updatePart(occ)
 
-    class DropDownDistanceV1(ParameterManager):
+    class DistanceDropDown(ParameterManager):
         def create(self, commandInputs):
             self.group = commandInputs.addGroupCommandInput(self.id, self.name)
-            self.dropDownInput = self.group.children.addDropDownCommandInput(self.id + '_options', 'Options', 1)
-            self.distanceValue = DistanceValueV1(self.id + '_distance_slider', 'Distance')
+            self.dropDownInput = self.group.children.addDropDownCommandInput(self.id + '_options', 'Standard Sizes', 1)
+            self.distanceValue = DistanceModule(self.id + '_distance_value', 'Distance')
             self.distanceValue.create(self.group.children)
             self.distanceValue.parameterId = self.id
 
@@ -189,7 +207,7 @@ def defineParameterManagers():
             self.distanceValue.show(occ)
             self.dropDownInput.listItems.clear()
             self.dropDownInput.listItems.add('Custom', True)
-            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
+            parameter = vex_cad.getPartData(comp)['parameters'][self.parameterId]
             for item in parameter["expressions"]:
                 isSelected = comp.modelParameters.item(parameter['index']).value == unitsMgr.evaluateExpression(item, '')
                 self.dropDownInput.listItems.add(item, isSelected)
@@ -217,11 +235,11 @@ def defineParameterManagers():
             self.distanceValue.updatePart(occ)
     
     return [
-        ButtonRowInsertsV1('inserts_v1', 'Inserts'),
-        DistanceValueV1('distance_length_v1', 'Length'),
-        DropDownDistanceV1('distance_list_v1', 'Size'),
-        DistanceHolesV1('length_holes_v1', 'Length'),
-        DistanceHolesV1('width_holes_v1', 'Width')
+        ButtonRowInserts('inserts_v1', 'Inserts'),
+        DistanceGroup('distance_length_v1', 'Length'),
+        DistanceDropDown('distance_list_size_v1', 'Size'),
+        DistanceSliderHoles('distance_holes_length_v1', 'Length'),
+        DistanceSliderHoles('distance_holes_width_v1', 'Width')
     ]
 
 
