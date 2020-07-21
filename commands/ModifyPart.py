@@ -10,8 +10,6 @@ import apper
 # from apper import apper.AppObjects
 
 import json
-# from .modules import keyboard
-import keyboard
 
 import vex_cad
 
@@ -20,15 +18,6 @@ allParameterManagers = []
 def defineParameterManagers():
     ao = apper.AppObjects()
     unitsMgr = ao.units_manager
-
-    class ConvertCustomUnits:
-        def __init__(self, ratio):
-            self.ratio = ratio
-        def value(self, input):
-            return unitsMgr.evaluateExpression(input + self.ratio, '')
-    
-    inToHoles = ConvertCustomUnits('/0.5in')
-    holesToIn = ConvertCustomUnits('*0.5in')
 
     coordSys = {'origin': 0, 'xAxis': 1, 'yAxis': 2, 'zAxis': 3}
 
@@ -260,12 +249,9 @@ def parameterManagersInParameters(comp):
 def showSomeCommandInputs(occ):
     for parameterManager in parameterManagersInParameters(occ.component):
         parameterManager.show(occ)
-    keyboard.press_and_release('tab')
 
 def updateInputs(occ, changedInput):
-    # ao = apper.AppObjects()
     for parameterManager in parameterManagersInParameters(occ.component):
-        # ao.ui.messageBox('in updateInputs: ' + str(occ))
         parameterManager.onUpdate(occ, changedInput)
 
 def updatePart(occ):
