@@ -3,43 +3,18 @@
     "parameters": {
         "length_holes_v1": {
             "index": 0,
-            "min_value": 1,
-            "max_value": 35
-        },
-        "width_holes_v1": {
-            "index": 1,
-            "min_value": 1,
-            "max_value": 5
+            "min_value": 1.27,
+            "max_value": 44.45,
+            "manipulator_axis": "yAxis",
+            "manipulator_point_offset": [
+                0.635,
+                -0.635,
+                0
+            ]
         }
     }
 }
 
-
-{
-    "version": "1.0.0",
-    "parameters": {
-        "length_holes_v1": {
-            "index": 0,
-            "min_value": 1,
-            "max_value": 35
-        }
-    }
-}
-
-{
-    "version": "1.0.0",
-    "parameters": {
-        "length_holes_v1": {
-            "index": 0,
-            "min_value": 0,
-            "max_value": 44.45'
-            "min_value_inclusive": false,
-            "max_value_inclusive": true,
-            "manipulator_point_offset": [0, -0.635, 0]
-            "manipulator_axis": 2
-        }
-    }
-}
 
 profile planes:
 length_start
@@ -259,38 +234,108 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
+// Linear Rail
 {
     "version": "1.0.0",
     "parameters": {
-        "length_inch_v1": {
+        "length_holes_v1": {
+            "index": 0,
+            "min_value": 1.27,
+            "max_value": 44.45,
+            "manipulator_point_offset": [
+                0,
+                -0.635,
+                0.88
+            ],
+            "manipulator_axis": "yAxis",
+            "manipulator_axis_flipped": false
+        }
+    }
+}
+
+// 35 long c-channel
+{
+    "version": "1.0.0",
+    "parameters": {
+        "length_holes_v1": {
+            "index": 0,
+            "min_value": 1.27,
+            "max_value": 44.45,
+            "manipulator_axis": "yAxis",
+            "manipulator_point_offset": [
+                0.635,
+                -0.635,
+                0
+            ]
+        }
+    }
+}
+
+// VEX Plate
+{
+    "version": "1.0.0",
+    "parameters": {
+        "length_holes_v1": {
+            "index": 0,
+            "min_value": 1.27,
+            "max_value": 31.75,
+            "manipulator_axis": "yAxis",
+            "manipulator_point_offset": [
+                -0.635,
+                -0.635,
+                0
+            ]
+        },
+        "width_holes_v1": {
+            "index": 1,
+            "min_value": 1.27,
+            "max_value": 6.35,
+            "manipulator_axis": "xAxis",
+            "manipulator_point_offset": [
+                -0.635,
+                -0.635,
+                0
+            ]
+        }
+    }
+}
+
+// Shaft
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_length_v1": {
+            "index": 0,
+            "min_value": 0.254,
+            "max_value": 30.48,
+            "manipulator_axis": "xAxis"
+        }
+    }
+}
+
+// V5 Motor HS Shaft
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_length_v1": {
             "index": 0,
             "min_value": 0,
-            "max_value": 28.24,
-            "min_value_inclusive": true,
-            "min_value_inclusive": true
+            "max_value": 28.76156475521437,
+            "manipulator_axis": "xAxis",
         }
     }
 }
 
 
-
-
-
-
+// V5 Motor LS Shaft
 {
     "version": "1.0.0",
     "parameters": {
-        "DistanceSliderV1": {
+        "distance_length_v1": {
             "index": 0,
             "min_value": 0,
             "max_value": 28.23999999944,
-            "manipulator_point_offset": [
-                0,
-                0,
-                0
-            ],
             "manipulator_axis": "xAxis",
-            "manipulator_axis_flipped": false
         }
     }
 }

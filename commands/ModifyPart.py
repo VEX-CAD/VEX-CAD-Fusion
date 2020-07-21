@@ -30,6 +30,8 @@ def defineParameterManagers():
     inToHoles = ConvertCustomUnits('/0.5in')
     holesToIn = ConvertCustomUnits('*0.5in')
 
+    coordSys = {'origin': 0, 'xAxis': 1, 'yAxis': 2, 'zAxis': 3}
+
     def setInsertLightBulb(comp, insertType, isOn):
         for i in range(comp.occurrences.count):
             subComp = comp.occurrences.item(i).component
@@ -53,13 +55,15 @@ def defineParameterManagers():
         def __init__(self, id, name):
             self.id = id
             self.name = name
+            self.parameterId = id
         # Defaults
         def hide(self):
             self.commandInput.isVisible = False
         def onUpdate(self, occ):
             pass
         def previewUpdatePart(self, occ):
-            pass
+            comp = occ.component
+            self.updatePart(occ)
 
         # Need to be redefined
         def create(self, commandInputs):
@@ -68,28 +72,6 @@ def defineParameterManagers():
             pass
         def onUpdate(self, occ, changedInput):
             pass
-    
-    class FloatSpinnerDistanceHolesV1(ParameterManager):
-        def create(self, commandInputs):
-            self.commandInput = commandInputs.addFloatSpinnerCommandInput(self.id, self.name, '', 1, 35, 1, 1)
-        def show(self, occ):
-            comp = occ.component
-            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
-            index = parameter['index']
-            self.commandInput.expression = str(inToHoles.value(comp.modelParameters.item(index).expression))
-            
-            self.commandInput.isVisible = True
-            # self.onUpdate(occ)
-        def onUpdate(self, occ, changedInput):
-            comp = occ.component
-            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
-            if self.commandInput.value > parameter['max_value']:
-                self.commandInput.value = parameter['max_value']
-
-        def updatePart(self, occ):
-            comp = occ.component
-            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
-            comp.modelParameters.item(parameter['index']).value = holesToIn.value(self.commandInput.expression)
     
     class ButtonRowInsertsV1(ParameterManager):
         def create(self, commandInputs):
@@ -105,10 +87,6 @@ def defineParameterManagers():
             self.commandInput.listItems.add('Round', isRoundSelected, 'commands/resources/command_icons/insert_round')
             self.commandInput.isVisible = True
 
-        def previewUpdatePart(self, occ):
-            comp = occ.component
-            self.updatePart(occ)
-
         def updatePart(self, occ):
             comp = occ.component
             itemName = self.commandInput.selectedItem.name
@@ -122,118 +100,129 @@ def defineParameterManagers():
                 setInsertLightBulb(comp, 'square', False)
                 setInsertLightBulb(comp, 'round', True)
     
+    class DistanceValueV1(ParameterManager):
+        def create(self, commandInputs):
+            self.commandInput = commandInputs.addDistanceValueCommandInput(self.id, self.name, adsk.core.ValueInput.createByReal(0))
+        
+        def show(self, occ):
+            comp = occ.component
+            ao = apper.AppObjects()
+            parameter = vex_cad.getPartData(comp)['parameters'][self.parameterId]
+            
+            self.commandInput.expression = comp.modelParameters.item(parameter['index']).expression
+            self.commandInput.minimumValue = parameter['min_value']
+            self.commandInput.maximumValue = parameter['max_value']
+            
+            occMatrix3D = occ.transform
+            if 'manipulator_point_offset' in parameter:
+                pointOffset = parameter['manipulator_point_offset']
+                newMatrix3D = adsk.core.Matrix3D.create()
+                for i in range(3):
+                    newMatrix3D.setCell(i, 3, pointOffset[i])
+                newMatrix3D.transformBy(occMatrix3D)
+                occMatrix3DCoords = newMatrix3D.getAsCoordinateSystem()
+            else:
+                occMatrix3DCoords = occMatrix3D.getAsCoordinateSystem()
+            
+            occVector3D = occMatrix3DCoords[coordSys[parameter['manipulator_axis']]]
+            if 'manipulator_axis_flipped' in parameter and parameter['manipulator_axis_flipped']:
+                occVector3D.scaleBy(-1)
+            occPoint3D = occMatrix3DCoords[coordSys['origin']]
+            self.commandInput.setManipulator(occPoint3D, occVector3D)
+            self.commandInput.isVisible = True
+
+        def updatePart(self, occ):
+            comp = occ.component
+            parameter = vex_cad.getPartData(comp)['parameters'][self.parameterId]
+            ao = apper.AppObjects()
+            unitsMgr = ao.units_manager
+            if unitsMgr.isValidExpression(self.commandInput.expression, ''):
+                comp.modelParameters.item(parameter['index']).value = self.commandInput.value
+
+    class DistanceHolesV1(ParameterManager):
+        def create(self, commandInputs):
+            self.group = commandInputs.addGroupCommandInput(self.id, self.name)
+            self.intSlider = self.group.children.addIntegerSliderCommandInput(self.id + '_int_slider', 'Holes', 0, 40)
+            self.distanceValue = DistanceValueV1(self.id + '_distance_slider', 'Distance')
+            self.distanceValue.create(self.group.children)
+            self.distanceValue.parameterId = self.id
+
+        def show(self, occ):
+            comp = occ.component
+            parameter = vex_cad.getPartData(comp)['parameters'][self.parameterId]
+            self.distanceValue.show(occ)
+            self.intSlider.minimumValue = int(parameter['min_value'] / 1.27)
+            self.intSlider.maximumValue = int(parameter['max_value'] / 1.27)
+            if self.distanceValue.commandInput.isValidExpression:
+                self.intSlider.valueOne = int(self.distanceValue.commandInput.value / 1.27 + 0.99)
+            self.intSlider.isVisible = True
+            self.group.isVisible = True
+
+        def hide(self):
+            self.distanceValue.hide()
+            self.intSlider.isVisible = False
+            self.group.isVisible = False
+
+        def onUpdate(self, occ, changedInput):
+            comp = occ.component
+            if  changedInput == self.distanceValue.commandInput:
+                if self.distanceValue.commandInput.isValidExpression:
+                    self.intSlider.valueOne = int(self.distanceValue.commandInput.value / 1.27 + 0.99)
+                
+            else:
+                self.distanceValue.commandInput.value = self.intSlider.valueOne * 1.27
+
+        def updatePart(self, occ):
+            self.distanceValue.updatePart(occ)
+
     class DropDownDistanceV1(ParameterManager):
         def create(self, commandInputs):
             self.group = commandInputs.addGroupCommandInput(self.id, self.name)
             self.dropDownInput = self.group.children.addDropDownCommandInput(self.id + '_options', 'Options', 1)
-            self.distanceInput = self.group.children.addDistanceValueCommandInput(self.id + '_distance', 'Distance', adsk.core.ValueInput.createByReal(0))
-        
-        def setVisiblity(self, isVisible):
-            self.group.isVisible = isVisible
-            for i in range(self.group.children.count):
-                self.group.children.item(i).isVisible = isVisible
+            self.distanceValue = DistanceValueV1(self.id + '_distance_slider', 'Distance')
+            self.distanceValue.create(self.group.children)
+            self.distanceValue.parameterId = self.id
 
-        def hide(self):
-            self.setVisiblity(False)
-        
         def show(self, occ):
             comp = occ.component
-            ao = apper.AppObjects()
+            parameter = vex_cad.getPartData(comp)['parameters'][self.parameterId]
+            self.distanceValue.show(occ)
             self.dropDownInput.listItems.clear()
             self.dropDownInput.listItems.add('Custom', True)
             parameter = vex_cad.getPartData(comp)['parameters'][self.id]
             for item in parameter["expressions"]:
-                # ao.ui.messageBox('item: ' + str(unitsMgr.evaluateExpression(item, 'inch')))
-                # ao.ui.messageBox('parameter: ' + str(comp.modelParameters.item(parameter['index']).value))
                 isSelected = comp.modelParameters.item(parameter['index']).value == unitsMgr.evaluateExpression(item, '')
-                # ao.ui.messageBox(str(isSelected))
                 self.dropDownInput.listItems.add(item, isSelected)
-            # self.dropDownInput.isVisible = True
             
-            self.distanceInput.expression = comp.modelParameters.item(parameter['index']).expression
-            self.distanceInput.minimumValue = parameter['min_value']
-            self.distanceInput.maximumValue = parameter['max_value']
+            self.dropDownInput.isVisible = True
+            self.distanceValue.isVisible = True
+            self.group.isVisible = True
 
-            coordSys = {'origin': 0, 'xAxis': 1, 'yAxis': 2, 'zAxis': 3}
-            occMatrix3D = occ.transform
-            occMatrix3DCoords = occMatrix3D.getAsCoordinateSystem()
-            occVector3D = occMatrix3DCoords[coordSys[parameter['manipulator_axis']]]
-            occPoint3D = occMatrix3DCoords[coordSys['origin']]
-            pointOffset = parameter['manipulator_point_offset']
-            self.distanceInput.setManipulator(occPoint3D, occVector3D)
-            self.setVisiblity(True)
-            
+        def hide(self):
+            self.distanceValue.hide()
+            self.dropDownInput.isVisible = False
+            self.group.isVisible = False
+
         def onUpdate(self, occ, changedInput):
             comp = occ.component
             selectedName = self.dropDownInput.selectedItem.name
-            if  changedInput == self.distanceInput:
+            if  changedInput == self.distanceValue.commandInput:
                 ao = apper.AppObjects()
                 unitsMgr = ao.units_manager
                 self.dropDownInput.listItems.item(0).isSelected = True
             elif  selectedName != 'Custom':
-                self.distanceInput.expression = selectedName
-
-        def previewUpdatePart(self, occ):
-            comp = occ.component
-            self.updatePart(occ)
+                self.distanceValue.commandInput.expression = selectedName
 
         def updatePart(self, occ):
-            comp = occ.component
-            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
-            ao = apper.AppObjects()
-            unitsMgr = ao.units_manager
-            if unitsMgr.isValidExpression(self.distanceInput.expression, ''):
-                comp.modelParameters.item(parameter['index']).value = self.distanceInput.value
-    
-    class DistanceSliderV1(ParameterManager):
-        def create(self, commandInputs):
-            self.group = commandInputs.addGroupCommandInput(self.id, self.name)
-            self.distanceInput = self.group.children.addDistanceValueCommandInput(self.id + '_distance', 'Distance', adsk.core.ValueInput.createByReal(0))
-        
-        def setVisiblity(self, isVisible):
-            self.group.isVisible = isVisible
-            for i in range(self.group.children.count):
-                self.group.children.item(i).isVisible = isVisible
-
-        def hide(self):
-            self.setVisiblity(False)
-        
-        def show(self, occ):
-            comp = occ.component
-            ao = apper.AppObjects()
-            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
-            
-            self.distanceInput.expression = comp.modelParameters.item(parameter['index']).expression
-            self.distanceInput.minimumValue = parameter['min_value']
-            self.distanceInput.maximumValue = parameter['max_value']
-
-            coordSys = {'origin': 0, 'xAxis': 1, 'yAxis': 2, 'zAxis': 3}
-            occMatrix3D = occ.transform
-            occMatrix3DCoords = occMatrix3D.getAsCoordinateSystem()
-            occVector3D = occMatrix3DCoords[coordSys[parameter['manipulator_axis']]]
-            occPoint3D = occMatrix3DCoords[coordSys['origin']]
-            pointOffset = parameter['manipulator_point_offset']
-            self.distanceInput.setManipulator(occPoint3D, occVector3D)
-            self.setVisiblity(True)
-
-        def previewUpdatePart(self, occ):
-            comp = occ.component
-            self.updatePart(occ)
-
-        def updatePart(self, occ):
-            comp = occ.component
-            parameter = vex_cad.getPartData(comp)['parameters'][self.id]
-            ao = apper.AppObjects()
-            unitsMgr = ao.units_manager
-            if unitsMgr.isValidExpression(self.distanceInput.expression, ''):
-                comp.modelParameters.item(parameter['index']).value = self.distanceInput.value
+            self.distanceValue.updatePart(occ)
     
     return [
-        DistanceSliderV1('DistanceSliderV1', 'Length'),
-        DropDownDistanceV1('distance_list_v1', 'Size'),
         ButtonRowInsertsV1('inserts_v1', 'Inserts'),
-        FloatSpinnerDistanceHolesV1('length_holes_v1', 'Length Holes'),
-        FloatSpinnerDistanceHolesV1('width_holes_v1', 'Width Holes')]
+        DistanceValueV1('distance_length_v1', 'Length'),
+        DropDownDistanceV1('distance_list_v1', 'Size'),
+        DistanceHolesV1('length_holes_v1', 'Length'),
+        DistanceHolesV1('width_holes_v1', 'Width')
+    ]
 
 
 def createAllCommandInputs(commandInputs):
@@ -292,6 +281,11 @@ class ModifyPart(apper.Fusion360CommandBase):
         selectionInput = inputs.itemById('selection_input_id')
         selectedOcc = selectionInput.selection(0).entity
         if selectedOcc.isReferencedComponent:
+            return
+        compFaces = 0
+        for i in range(selectedOcc.component.bRepBodies.count):
+            compFaces = compFaces + selectedOcc.component.bRepBodies.item(i).faces.count
+        if compFaces > 300:
             return
         previewUpdatePart(selectedOcc)
 
@@ -352,13 +346,6 @@ class ModifyPart(apper.Fusion360CommandBase):
     def on_create(self, command: adsk.core.Command, inputs: adsk.core.CommandInputs):
 
         ao = apper.AppObjects()
-
-        # Create a default value using a string
-        default_value = adsk.core.ValueInput.createByString('1.0 in')
-
-        # Get teh user's current units
-        default_units = ao.units_manager.defaultLengthUnits
-
 
         selectionInput = inputs.addSelectionInput('selection_input_id', 'Part', 'Component to select')
         selectionInput.setSelectionLimits(1, 1)
