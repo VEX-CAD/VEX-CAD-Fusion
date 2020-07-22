@@ -128,7 +128,7 @@ max((width_distance / 0.5 in ) - 0.1; 1)
             "index": 0,
             "min_value": 0.254,
             "max_value": 5.08,
-            "manipulator_axis": "yAxis",
+            "manipulator_axis": "xAxis",
             "expressions": [
                 "0.250 in",
                 "0.375 in",
@@ -211,6 +211,61 @@ max((width_distance / 0.5 in ) - 0.1; 1)
     }
 }
 
+
+// 1x35 long angle
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_holes_length_v1": {
+            "index": 0,
+            "min_value": 1.27,
+            "max_value": 44.45,
+            "manipulator_axis": "yAxis",
+            "manipulator_point_offset": [
+                0,
+                -0.635,
+                0
+            ]
+        }
+    }
+}
+
+// 2x35 long angle and u-channel
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_holes_length_v1": {
+            "index": 0,
+            "min_value": 1.27,
+            "max_value": 44.45,
+            "manipulator_axis": "yAxis",
+            "manipulator_point_offset": [
+                0.635,
+                -0.635,
+                0.635
+            ]
+        }
+    }
+}
+
+// 3x35 long angle
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_holes_length_v1": {
+            "index": 0,
+            "min_value": 1.27,
+            "max_value": 44.45,
+            "manipulator_axis": "yAxis",
+            "manipulator_point_offset": [
+                1.27,
+                -0.635,
+                1.27
+            ]
+        }
+    }
+}
+
 // 35 long c-channel
 {
     "version": "1.0.0",
@@ -248,6 +303,35 @@ max((width_distance / 0.5 in ) - 0.1; 1)
             "index": 1,
             "min_value": 1.27,
             "max_value": 6.35,
+            "manipulator_axis": "xAxis",
+            "manipulator_point_offset": [
+                -0.635,
+                -0.635,
+                0.08
+            ]
+        }
+    }
+}
+
+// Plate from 5x c-channel
+{
+    "version": "1.0.0",
+    "parameters": {
+        "distance_holes_length_v1": {
+            "index": 0,
+            "min_value": 1.27,
+            "max_value": 44.45,
+            "manipulator_axis": "yAxis",
+            "manipulator_point_offset": [
+                -0.635,
+                -0.635,
+                0.08
+            ]
+        },
+        "distance_holes_width_v1": {
+            "index": 1,
+            "min_value": 1.27,
+            "max_value": 3.81,
             "manipulator_axis": "xAxis",
             "manipulator_point_offset": [
                 -0.635,

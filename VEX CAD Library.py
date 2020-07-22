@@ -9,8 +9,7 @@ sys.path.insert(0, app_path)
 sys.path.insert(0, os.path.join(app_path, 'apper'))
 
 # Set to True to use beta and development features
-developmentFeatures = True
-unreleasedFeatures = False
+developmentFeatures = False
 # Set to True to display various useful messages when debugging
 debug = False
 # global addin
@@ -22,11 +21,8 @@ try:
     from .commands.ModifyPart import ModifyPart
     from .commands.ModifyPart import ModifyPartExternalCommandStarted
     from .commands.ModifyPart import ModifyPartExternalCommandEnded
-    from .commands.SimpleJoint import SimpleJoint
     from .commands.SetAttributes import SetAttributes
     from .commands.ViewAttributes import ViewAttributes
-    from .commands.ShowJointOriginsByBoundingBox import ShowJointOriginsByBoundingBox
-    from .commands.PointsToJointOrigins import PointsToJointOrigins
 
     app = adsk.core.Application.cast(adsk.core.Application.get())
     ui = app.userInterface
@@ -75,49 +71,6 @@ try:
                 'workspace': 'FusionSolidEnvironment',
                 'toolbar_panel_id': 'Development',
                 'cmd_resources': 'command_icons/attributes',
-                'command_visible': True,
-                'command_promoted': True,
-            }
-        )
-
-    if unreleasedFeatures:
-        addin.add_command(
-            'Simple Joint (beta)',
-            SimpleJoint,
-            {
-                'cmd_description': 'An easier to use joint tool for connecting VEX parts',
-                'cmd_id': 'simple_joint',
-                'workspace': 'FusionSolidEnvironment',
-                'toolbar_panel_id': 'Assemble',
-                'cmd_resources': 'command_icons/joint',
-                'command_visible': True,
-                'command_promoted': True,
-            }
-        )
-
-        addin.add_command(
-            'Points to Joint Origins',
-            PointsToJointOrigins,
-            {
-                'cmd_description': 'Set custom attributes for parts from the VEX CAD Library.\n\nSelect part component and input valid JSON string.',
-                'cmd_id': 'points_to_joint_origins',
-                'workspace': 'FusionSolidEnvironment',
-                'toolbar_panel_id': 'Advanced',
-                'cmd_resources': 'command_icons/joint_origin',
-                'command_visible': True,
-                'command_promoted': True,
-            }
-        )
-
-        addin.add_command(
-            'Show Joint Origins by Bounding Box',
-            ShowJointOriginsByBoundingBox,
-            {
-                'cmd_description': 'Set custom attributes for parts from the VEX CAD Library.\n\nSelect part component and input valid JSON string.',
-                'cmd_id': 'show_joint_origins_by_bounding_box',
-                'workspace': 'FusionSolidEnvironment',
-                'toolbar_panel_id': 'Modify',
-                'cmd_resources': 'command_icons/joint_origin',
                 'command_visible': True,
                 'command_promoted': True,
             }
