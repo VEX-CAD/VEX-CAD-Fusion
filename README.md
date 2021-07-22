@@ -1,4 +1,4 @@
-# VEX CAD Fusion 360 Library
+Fusion 360 Library
 ## [Latest Release: 1.0.0](https://github.com/VEX-CAD/VEX-CAD-Fusion/releases/tag/v1.0.0)
 
 This parts library includes a number of parametric parts such as adjustable length C-channels and gears with swappable inserts that can be edited using our custom add-in. The add-in is not required to use this library but is **highly suggested** for your ease of use.
