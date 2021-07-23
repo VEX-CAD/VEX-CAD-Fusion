@@ -20,7 +20,7 @@ To install the add-in, download the [zip file](https://github.com/vexcad/fusion-
 Please read the [FAQ](https://github.com/VEX-CAD/VEX-CAD-Fusion/wiki/FAQ) if you're having installation issues. 
 
 ## [VEX CAD Discord](https://discord.gg/BKV3DJm)
-If you need more help, or would like assistance from experienced users, please ask in our [discord server](https://discord.gg/BKV3DJm)!
+If you need more help, or would like assistance from experienced users, please ask in our [Discord server](https://discord.gg/BKV3DJm)!
 
 ## Fusion 360 Library Contributors
  - Aidan - Buff
